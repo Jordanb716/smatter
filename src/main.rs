@@ -29,7 +29,7 @@ struct FireTurret(bool);
 struct GunShotsPerSecond(f32);
 
 #[derive(Component, Deref, DerefMut)]
-struct GunShootTimer(Timer);
+struct GunDelayTimer(Timer);
 
 #[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec2);
@@ -82,8 +82,9 @@ fn setup(mut commands: Commands) {
 		.insert(Turret)
 		.insert(Velocity(Vec2::new(0.0, 0.0)))
 		.insert(GunVelocity(50.0))
-		.insert(FireTurret(true))
-		.insert(GunShotsPerSecond(4.0));
+		.insert(FireTurret(false))
+		.insert(GunShotsPerSecond(4.0))
+		.insert(GunDelayTimer(Timer::from_seconds(0.0, false)));
 }
 
 fn object_movement_system(mut movement_query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
@@ -129,7 +130,7 @@ fn turret_targeting_system(
 	mut turret: Query<
 		(&mut Transform, &Velocity, &GunVelocity, &mut FireTurret),
 		(With<Turret>, Without<Enemy>),
-	>, // needs target component later
+	>,
 	enemy: Query<(&Transform, &Velocity), With<Enemy>>,
 ) {
 	for mut turret in turret.iter_mut() {
@@ -149,8 +150,6 @@ fn turret_targeting_system(
 				(-dot - sqrt) / target_distance,
 				(-dot + sqrt) / target_distance,
 			);
-
-			println!("time: {} {}", intercept_time.0, intercept_time.1);
 
 			if intercept_time.0 > 0.0 {
 				turret.0.rotation = Quat::from_rotation_z(
@@ -175,31 +174,45 @@ fn turret_targeting_system(
 }
 
 fn turret_firing_system(
+	time: Res<Time>,
 	mut commands: Commands,
-	turret: Query<(&Transform, &GunVelocity, &FireTurret), With<Turret>>,
+	mut turret: Query<
+		(
+			Entity,
+			&Transform,
+			&GunVelocity,
+			&FireTurret,
+			&mut GunDelayTimer,
+			&GunShotsPerSecond,
+		),
+		With<Turret>,
+	>,
 ) {
-	for turret in turret.iter() {
-		if (turret.2).0 == true {
-			commands.insert_resource(GunShootTimer(Timer::from_seconds(1.0 / 4.0, false)));
-			commands
-				.spawn_bundle(SpriteBundle {
-					sprite: Sprite {
-						color: (Color::RED),
+	for mut turret in turret.iter_mut() {
+		(turret.4).tick(time.delta());
+		if (turret.3).0 == true {
+			if (turret.4).0.finished() {
+				(turret.4).0 = Timer::from_seconds(1.0 / (turret.5).0, false);
+				commands
+					.spawn_bundle(SpriteBundle {
+						sprite: Sprite {
+							color: (Color::RED),
+							..Default::default()
+						},
+						transform: Transform {
+							translation: turret.1.translation,
+							scale: Vec3::new(2.0, 2.0, 0.0),
+							..Default::default()
+						},
 						..Default::default()
-					},
-					transform: Transform {
-						translation: turret.0.translation,
-						scale: Vec3::new(4.0, 4.0, 0.0),
-						..Default::default()
-					},
-					..Default::default()
-				})
-				.insert(Projectile)
-				.insert(Velocity(
-					Vec2::from(turret.0.rotation.to_scaled_axis().to_array()[2].sin_cos())
-						* (turret.1).0,
-				))
-				.insert(Damage(1));
+					})
+					.insert(Projectile)
+					.insert(Velocity(
+						Vec2::from(turret.1.rotation.to_scaled_axis().to_array()[2].sin_cos())
+							* (turret.2).0,
+					))
+					.insert(Damage(1));
+			}
 		}
 	}
 }
