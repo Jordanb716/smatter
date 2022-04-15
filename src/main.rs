@@ -22,25 +22,25 @@ struct Projectile;
 #[derive(Component)]
 struct Turret;
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct FireTurret(bool);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct GunShotsPerSecond(f32);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct GunShootTimer(Timer);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec2);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct Health(i32);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct Damage(i32);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 struct GunVelocity(f32);
 
 fn setup(mut commands: Commands) {
