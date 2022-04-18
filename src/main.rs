@@ -10,8 +10,17 @@ fn main() {
 		.add_system(kill_system)
 		.add_system(turret_targeting_system)
 		.add_system(turret_firing_system)
+		.insert_resource(SpawnTimer(Timer::from_seconds(0.5, true)))
+		.add_system(target_spawn_system)
 		.run();
 }
+
+// Resources
+
+#[derive(Deref, DerefMut)]
+struct SpawnTimer(Timer);
+
+// Components
 
 #[derive(Component)]
 struct Enemy;
@@ -47,24 +56,6 @@ fn setup(mut commands: Commands) {
 	// Camera
 	commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
-	// Target
-	commands
-		.spawn_bundle(SpriteBundle {
-			sprite: Sprite {
-				color: (Color::YELLOW),
-				..Default::default()
-			},
-			transform: Transform {
-				translation: Vec3::new(-400.0, 300.0, 0.0),
-				scale: Vec3::new(10.0, 10.0, 0.0),
-				..Default::default()
-			},
-			..Default::default()
-		})
-		.insert(Enemy)
-		.insert(Health(10))
-		.insert(Velocity(Vec2::new(10.0, 0.0)));
-
 	// Turret
 	commands
 		.spawn_bundle(SpriteBundle {
@@ -73,7 +64,7 @@ fn setup(mut commands: Commands) {
 				..Default::default()
 			},
 			transform: Transform {
-				translation: Vec3::new(0.0, 0.0, 0.0),
+				translation: Vec3::new(-100.0, 0.0, 0.0),
 				scale: Vec3::new(5.0, 10.0, 0.0),
 				..Default::default()
 			},
@@ -81,10 +72,54 @@ fn setup(mut commands: Commands) {
 		})
 		.insert(Turret)
 		.insert(Velocity(Vec2::new(0.0, 0.0)))
-		.insert(GunVelocity(50.0))
+		.insert(GunVelocity(200.0))
 		.insert(FireTurret(false))
-		.insert(GunShotsPerSecond(4.0))
+		.insert(GunShotsPerSecond(40.0))
 		.insert(GunDelayTimer(Timer::from_seconds(0.0, false)));
+
+	commands
+		.spawn_bundle(SpriteBundle {
+			sprite: Sprite {
+				color: (Color::YELLOW),
+				..Default::default()
+			},
+			transform: Transform {
+				translation: Vec3::new(100.0, 0.0, 0.0),
+				scale: Vec3::new(5.0, 10.0, 0.0),
+				..Default::default()
+			},
+			..Default::default()
+		})
+		.insert(Turret)
+		.insert(Velocity(Vec2::new(0.0, 0.0)))
+		.insert(GunVelocity(200.0))
+		.insert(FireTurret(false))
+		.insert(GunShotsPerSecond(40.0))
+		.insert(GunDelayTimer(Timer::from_seconds(0.0, false)));
+}
+
+fn target_spawn_system(mut commands: Commands, time: Res<Time>, mut timer: ResMut<SpawnTimer>) {
+	if timer.tick(time.delta()).just_finished() {
+		commands
+			.spawn_bundle(SpriteBundle {
+				sprite: Sprite {
+					color: (Color::YELLOW),
+					..Default::default()
+				},
+				transform: Transform {
+					translation: Vec3::new(random::<f32>() * 600.0 - 300.0, 400.0, 0.0),
+					scale: Vec3::new(4.0, 4.0, 0.0),
+					..Default::default()
+				},
+				..Default::default()
+			})
+			.insert(Enemy)
+			.insert(Health(10))
+			.insert(Velocity(Vec2::new(
+				random::<f32>() * 80.0 - 10.0,
+				random::<f32>() * -80.0 - 20.0,
+			)));
+	}
 }
 
 fn object_movement_system(mut movement_query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
@@ -133,42 +168,54 @@ fn turret_targeting_system(
 	>,
 	enemy: Query<(&Transform, &Velocity), With<Enemy>>,
 ) {
+	if enemy.is_empty() {
+		return;
+	}
+
 	for mut turret in turret.iter_mut() {
+		let gun_velocity = (turret.2).0;
+		let mut target = enemy.iter().next().unwrap();
+		let mut relative_position = (target.0.translation - turret.0.translation).truncate();
+
+		//Find closest possible target
 		for enemy in enemy.iter() {
-			let gun_velocity = (turret.2).0;
-			// Go through enemies to find closest in range later
-			let relative_position = (enemy.0.translation - turret.0.translation).truncate();
-			let relative_velocity = (enemy.1).0 - (turret.1).0;
+			relative_position = (target.0.translation - turret.0.translation).truncate();
+			let relative_enemy_position = (enemy.0.translation - turret.0.translation).truncate();
+			if relative_enemy_position.length() < relative_position.length() {
+				target = enemy;
+			}
+		}
 
-			let dot = Vec2::dot(relative_position, relative_velocity);
-			let target_distance = relative_position.length_squared();
-			let i_speed2 = gun_velocity.powi(2);
-			let target_speed = relative_velocity.length_squared();
-			let sqrt = ((dot * dot) - target_distance * (target_speed - i_speed2)).sqrt();
+		let relative_velocity = (target.1).0 - (turret.1).0;
 
-			let intercept_time = (
-				(-dot - sqrt) / target_distance,
-				(-dot + sqrt) / target_distance,
+		let dot = Vec2::dot(relative_position, relative_velocity);
+		let target_distance = relative_position.length_squared();
+		let i_speed2 = gun_velocity.powi(2);
+		let target_speed = relative_velocity.length_squared();
+		let sqrt = ((dot * dot) - target_distance * (target_speed - i_speed2)).sqrt();
+
+		let whatever_the_hell_this_is = (
+			(-dot - sqrt) / target_distance,
+			(-dot + sqrt) / target_distance,
+		);
+
+		if whatever_the_hell_this_is.0 > 0.0 {
+			turret.0.rotation = Quat::from_rotation_z(
+				((whatever_the_hell_this_is.0 * relative_position + relative_velocity).x
+					/ (whatever_the_hell_this_is.0 * relative_position + relative_velocity).y)
+					.atan(),
+			);
+			(turret.3).0 = true;
+		} else if whatever_the_hell_this_is.1 > 0.0 {
+			turret.0.rotation = Quat::from_rotation_z(
+				((whatever_the_hell_this_is.1 * relative_position + relative_velocity).x
+					/ (whatever_the_hell_this_is.1 * relative_position + relative_velocity).y)
+					.atan(),
 			);
 
-			if intercept_time.0 > 0.0 {
-				turret.0.rotation = Quat::from_rotation_z(
-					((intercept_time.0 * relative_position + relative_velocity).x
-						/ (intercept_time.0 * relative_position + relative_velocity).y)
-						.atan(),
-				);
-				(turret.3).0 = true;
-			} else if intercept_time.1 > 0.0 {
-				turret.0.rotation = Quat::from_rotation_z(
-					((intercept_time.1 * relative_position + relative_velocity).x
-						/ (intercept_time.1 * relative_position + relative_velocity).y)
-						.atan(),
-				);
-
-				(turret.3).0 = true;
-			} else {
-				(turret.3).0 = false;
-			}
+			(turret.3).0 = true;
+		} else {
+			(turret.3).0 = false;
 		}
 	}
 }
@@ -189,10 +236,26 @@ fn turret_firing_system(
 	>,
 ) {
 	for mut turret in turret.iter_mut() {
+		let gun_velocity = (turret.2).0;
+
 		(turret.4).tick(time.delta());
+
 		if (turret.3).0 == true {
 			if (turret.4).0.finished() {
+				// Set timer for RoF delay.
 				(turret.4).0 = Timer::from_seconds(1.0 / (turret.5).0, false);
+
+				// Calculate random spread
+				let bullet_spread_degrees = 4.0;
+				let shot_deviation = (((rand::random::<f32>() + rand::random::<f32>()) / 2.0
+					- 0.5) * bullet_spread_degrees)
+					.to_radians();
+
+				// Add deviation to projectile velocity
+				let velocity_deviation_mps = 1.0;
+				let gun_velocity =
+					gun_velocity + (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
+
 				commands
 					.spawn_bundle(SpriteBundle {
 						sprite: Sprite {
@@ -208,8 +271,10 @@ fn turret_firing_system(
 					})
 					.insert(Projectile)
 					.insert(Velocity(
-						Vec2::from(turret.1.rotation.to_scaled_axis().to_array()[2].sin_cos())
-							* (turret.2).0,
+						Vec2::from(
+							(turret.1.rotation.to_scaled_axis().to_array()[2] + shot_deviation)
+								.sin_cos(),
+						) * gun_velocity,
 					))
 					.insert(Damage(1));
 			}
