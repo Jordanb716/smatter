@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::collide_aabb::collide};
+use bevy::{prelude::*, render::camera::ScalingMode, sprite::collide_aabb::collide};
 use rand::prelude::*;
 
 fn main() {
@@ -54,7 +54,10 @@ struct GunVelocity(f32);
 
 fn setup(mut commands: Commands) {
 	// Camera
-	commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+	let mut camera = OrthographicCameraBundle::new_2d();
+	camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;
+	camera.orthographic_projection.scale = 1000.0;
+	commands.spawn_bundle(camera);
 
 	// Turret
 	commands
