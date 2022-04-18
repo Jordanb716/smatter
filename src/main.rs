@@ -64,14 +64,14 @@ fn setup(mut commands: Commands) {
 		.spawn_bundle(SpriteBundle {
 			sprite: Sprite {
 				color: (Color::YELLOW),
-				..Default::default()
+				..default()
 			},
 			transform: Transform {
 				translation: Vec3::new(-100.0, 0.0, 0.0),
 				scale: Vec3::new(5.0, 10.0, 0.0),
 				..Default::default()
 			},
-			..Default::default()
+			..default()
 		})
 		.insert(Turret)
 		.insert(Velocity(Vec2::new(0.0, 0.0)))
@@ -84,14 +84,14 @@ fn setup(mut commands: Commands) {
 		.spawn_bundle(SpriteBundle {
 			sprite: Sprite {
 				color: (Color::YELLOW),
-				..Default::default()
+				..default()
 			},
 			transform: Transform {
 				translation: Vec3::new(100.0, 0.0, 0.0),
 				scale: Vec3::new(5.0, 10.0, 0.0),
-				..Default::default()
+				..default()
 			},
-			..Default::default()
+			..default()
 		})
 		.insert(Turret)
 		.insert(Velocity(Vec2::new(0.0, 0.0)))
@@ -107,14 +107,14 @@ fn target_spawn_system(mut commands: Commands, time: Res<Time>, mut timer: ResMu
 			.spawn_bundle(SpriteBundle {
 				sprite: Sprite {
 					color: (Color::YELLOW),
-					..Default::default()
+					..default()
 				},
 				transform: Transform {
 					translation: Vec3::new(random::<f32>() * 600.0 - 300.0, 400.0, 0.0),
 					scale: Vec3::new(4.0, 4.0, 0.0),
-					..Default::default()
+					..default()
 				},
-				..Default::default()
+				..default()
 			})
 			.insert(Enemy)
 			.insert(Health(10))
@@ -269,14 +269,14 @@ fn turret_firing_system(
 					.spawn_bundle(SpriteBundle {
 						sprite: Sprite {
 							color: (Color::RED),
-							..Default::default()
+							..default()
 						},
 						transform: Transform {
 							translation: turret.1.translation,
 							scale: Vec3::new(2.0, 2.0, 0.0),
-							..Default::default()
+							..default()
 						},
-						..Default::default()
+						..default()
 					})
 					.insert(Projectile)
 					.insert(Velocity(
