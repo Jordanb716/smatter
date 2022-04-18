@@ -210,14 +210,14 @@ fn turret_targeting_system(
 
 		if whatever_the_hell_this_is.0 > 0.0 {
 			turret_transform.rotation = Quat::from_rotation_z(
-				((whatever_the_hell_this_is.0 * relative_position + relative_velocity).x
+				-((whatever_the_hell_this_is.0 * relative_position + relative_velocity).x
 					/ (whatever_the_hell_this_is.0 * relative_position + relative_velocity).y)
 					.atan(),
 			);
 			turret_fire_turret.0 = true;
 		} else if whatever_the_hell_this_is.1 > 0.0 {
 			turret_transform.rotation = Quat::from_rotation_z(
-				((whatever_the_hell_this_is.1 * relative_position + relative_velocity).x
+				-((whatever_the_hell_this_is.1 * relative_position + relative_velocity).x
 					/ (whatever_the_hell_this_is.1 * relative_position + relative_velocity).y)
 					.atan(),
 			);
@@ -234,7 +234,6 @@ fn turret_firing_system(
 	mut commands: Commands,
 	mut turret: Query<
 		(
-			Entity,
 			&Transform,
 			&GunVelocity,
 			&FireTurret,
@@ -244,15 +243,13 @@ fn turret_firing_system(
 		With<Turret>,
 	>,
 ) {
-	for mut turret in turret.iter_mut() {
-		let gun_velocity = (turret.2).0;
+	for (turret_transform, turret_gun_velocity, turret_fire_turret, mut turret_gun_delay_timer, turret_shots_per_second) in turret.iter_mut() {
+		turret_gun_delay_timer.tick(time.delta());
 
-		(turret.4).tick(time.delta());
-
-		if (turret.3).0 == true {
-			if (turret.4).0.finished() {
+		if turret_fire_turret.0 == true {
+			if turret_gun_delay_timer.0.finished() {
 				// Set timer for RoF delay.
-				(turret.4).0 = Timer::from_seconds(1.0 / (turret.5).0, false);
+				turret_gun_delay_timer.0 = Timer::from_seconds(1.0 / turret_shots_per_second.0, false);
 
 				// Calculate random spread
 				let bullet_spread_degrees = 4.0;
@@ -262,8 +259,8 @@ fn turret_firing_system(
 
 				// Add deviation to projectile velocity
 				let velocity_deviation_mps = 1.0;
-				let gun_velocity =
-					gun_velocity + (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
+				let turret_gun_velocity =
+				turret_gun_velocity.0 + (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
 
 				commands
 					.spawn_bundle(SpriteBundle {
@@ -272,7 +269,7 @@ fn turret_firing_system(
 							..default()
 						},
 						transform: Transform {
-							translation: turret.1.translation,
+							translation: turret_transform.translation,
 							scale: Vec3::new(2.0, 2.0, 0.0),
 							..default()
 						},
@@ -281,9 +278,9 @@ fn turret_firing_system(
 					.insert(Projectile)
 					.insert(Velocity(
 						Vec2::from(
-							(turret.1.rotation.to_scaled_axis().to_array()[2] + shot_deviation)
+							(-turret_transform.rotation.to_scaled_axis().to_array()[2] + shot_deviation)
 								.sin_cos(),
-						) * gun_velocity,
+						) * turret_gun_velocity,
 					))
 					.insert(Damage(1));
 			}
