@@ -172,24 +172,30 @@ fn turret_targeting_system(
 	enemy: Query<(&Transform, &Velocity), With<Enemy>>,
 ) {
 	if enemy.is_empty() {
+		for (_, _, _, mut turret_fire_turret) in turret.iter_mut() {
+			turret_fire_turret.0 = false;
+		}
 		return;
 	}
 
-	for mut turret in turret.iter_mut() {
-		let gun_velocity = (turret.2).0;
+	for (mut turret_transform, turret_velocity, gun_velocity, mut turret_fire_turret) in
+		turret.iter_mut()
+	{
 		let mut target = enemy.iter().next().unwrap();
-		let mut relative_position = (target.0.translation - turret.0.translation).truncate();
+		let mut relative_position =
+			(target.0.translation - turret_transform.translation).truncate();
 
 		//Find closest possible target
 		for enemy in enemy.iter() {
-			relative_position = (target.0.translation - turret.0.translation).truncate();
-			let relative_enemy_position = (enemy.0.translation - turret.0.translation).truncate();
+			relative_position = (target.0.translation - turret_transform.translation).truncate();
+			let relative_enemy_position =
+				(enemy.0.translation - turret_transform.translation).truncate();
 			if relative_enemy_position.length() < relative_position.length() {
 				target = enemy;
 			}
 		}
 
-		let relative_velocity = (target.1).0 - (turret.1).0;
+		let relative_velocity = (target.1).0 - turret_velocity.0;
 
 		let dot = Vec2::dot(relative_position, relative_velocity);
 		let target_distance = relative_position.length_squared();
@@ -203,22 +209,22 @@ fn turret_targeting_system(
 		);
 
 		if whatever_the_hell_this_is.0 > 0.0 {
-			turret.0.rotation = Quat::from_rotation_z(
+			turret_transform.rotation = Quat::from_rotation_z(
 				((whatever_the_hell_this_is.0 * relative_position + relative_velocity).x
 					/ (whatever_the_hell_this_is.0 * relative_position + relative_velocity).y)
 					.atan(),
 			);
-			(turret.3).0 = true;
+			turret_fire_turret.0 = true;
 		} else if whatever_the_hell_this_is.1 > 0.0 {
-			turret.0.rotation = Quat::from_rotation_z(
+			turret_transform.rotation = Quat::from_rotation_z(
 				((whatever_the_hell_this_is.1 * relative_position + relative_velocity).x
 					/ (whatever_the_hell_this_is.1 * relative_position + relative_velocity).y)
 					.atan(),
 			);
 
-			(turret.3).0 = true;
+			turret_fire_turret.0 = true;
 		} else {
-			(turret.3).0 = false;
+			turret_fire_turret.0 = false;
 		}
 	}
 }
