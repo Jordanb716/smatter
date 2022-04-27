@@ -6,7 +6,7 @@ pub fn turret_targeting_system(
 			&Parent,
 			&GlobalTransform,
 			&mut Transform,
-			&GunVelocity,
+			&ProjectileVelocity,
 			&mut FireTurret,
 		),
 		(With<Turret>, Without<Enemy>),
@@ -25,7 +25,7 @@ pub fn turret_targeting_system(
 		turret_parent,
 		turret_global_transform,
 		mut turret_transform,
-		gun_velocity,
+		projectile_velocity,
 		mut turret_fire_turret,
 	) in turret.iter_mut()
 	{
@@ -46,8 +46,11 @@ pub fn turret_targeting_system(
 
 		let relative_velocity = (target.1).0 - ship_query.get(turret_parent.0).unwrap().0;
 
-		let target_point =
-			target_prediction_first_order(relative_position, relative_velocity, gun_velocity.0);
+		let target_point = target_prediction_first_order(
+			relative_position,
+			relative_velocity,
+			projectile_velocity.0,
+		);
 		if target_point.is_some() {
 			turret_transform.rotation = target_point.unwrap();
 			turret_fire_turret.0 = true;
@@ -60,11 +63,11 @@ pub fn turret_targeting_system(
 pub fn target_prediction_first_order(
 	relative_position: Vec2,
 	relative_velocity: Vec2,
-	gun_velocity: f32,
+	projectile_velocity: f32,
 ) -> Option<Quat> {
 	let dot = Vec2::dot(relative_position, relative_velocity);
 	let target_distance = relative_position.length_squared();
-	let i_speed2 = gun_velocity.powi(2);
+	let i_speed2 = projectile_velocity.powi(2);
 	let target_speed = relative_velocity.length_squared();
 	let sqrt = ((dot * dot) - target_distance * (target_speed - i_speed2)).sqrt();
 
@@ -92,12 +95,14 @@ pub fn target_prediction_first_order(
 
 pub fn turret_firing_system(
 	time: Res<Time>,
+	asset_server: Res<AssetServer>,
+	audio: Res<Audio>,
 	mut commands: Commands,
 	mut turret: Query<
 		(
 			&Parent,
 			&GlobalTransform,
-			&GunVelocity,
+			&ProjectileVelocity,
 			&FireTurret,
 			&mut GunDelayTimer,
 			&GunShotsPerSecond,
@@ -109,7 +114,7 @@ pub fn turret_firing_system(
 	for (
 		turret_parent,
 		turret_transform,
-		turret_gun_velocity,
+		turret_projectile_velocity,
 		turret_fire_turret,
 		mut turret_gun_delay_timer,
 		turret_shots_per_second,
@@ -130,9 +135,10 @@ pub fn turret_firing_system(
 					.to_radians();
 
 				// Add deviation to projectile velocity
-				let velocity_deviation_mps = turret_gun_velocity.0 * 0.01;
-				let turret_gun_velocity =
-					turret_gun_velocity.0 + (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
+				let velocity_deviation_mps = turret_projectile_velocity.0 * 0.01;
+				let turret_projectile_velocity = turret_projectile_velocity.0
+					+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
+				let gun_velocity = Velocity(ship_query.get(turret_parent.0).unwrap().0);
 
 				commands
 					.spawn_bundle(SpriteBundle {
@@ -141,8 +147,8 @@ pub fn turret_firing_system(
 							..default()
 						},
 						transform: Transform {
-							translation: turret_transform.translation,
-							scale: Vec3::new(2.0, 2.0, 0.0),
+							translation: turret_transform.translation + Vec3::new(0.0, 0.0, -1.0),
+							scale: Vec3::new(1.0, 1.0, 1.0),
 							..default()
 						},
 						..default()
@@ -153,9 +159,10 @@ pub fn turret_firing_system(
 							(-turret_transform.rotation.to_scaled_axis().to_array()[2]
 								+ shot_deviation)
 								.sin_cos(),
-						) * turret_gun_velocity + ship_query.get(turret_parent.0).unwrap().0,
+						) * turret_projectile_velocity + gun_velocity.0,
 					))
 					.insert(Damage(1));
+				audio.play(asset_server.load("temp_gun_fire.ogg"));
 			}
 		}
 	}

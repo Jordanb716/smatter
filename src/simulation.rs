@@ -38,7 +38,7 @@ pub struct Health(pub i32);
 pub struct Damage(pub i32);
 
 #[derive(Component, Deref, DerefMut)]
-pub struct GunVelocity(pub f32);
+pub struct ProjectileVelocity(pub f32);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct IsTargeting(pub Option<Entity>);
