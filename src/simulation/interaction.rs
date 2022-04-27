@@ -1,8 +1,11 @@
 use super::*;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct Damage(pub i32);
+
 pub fn kill_system(
 	mut commands: Commands,
-	enemy: Query<(Entity, &Health), (Changed<Health>, With<Enemy>)>,
+	enemy: Query<(Entity, &ship::Health), (Changed<ship::Health>, With<ship::Enemy>)>,
 ) {
 	for (entity, health) in enemy.iter() {
 		if health.0 <= 0 {

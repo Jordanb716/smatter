@@ -15,7 +15,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 			texture: asset_server.load("temp_ship.png"),
 			..default()
 		})
-		.insert(Velocity(Vec2::new(0.0, 40.0)))
+		.insert(physics::Velocity(Vec2::new(0.0, 40.0)))
 		.with_children(|parent| {
 			// Turrets
 			parent
@@ -29,11 +29,11 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 					texture: asset_server.load("temp_turret.png"),
 					..default()
 				})
-				.insert(Turret)
-				.insert(ProjectileVelocity(200.0))
-				.insert(FireTurret(false))
-				.insert(GunShotsPerSecond(40.0))
-				.insert(GunDelayTimer(Timer::from_seconds(0.0, false)));
+				.insert(turret::IsTurret)
+				.insert(turret::FireTurret(false))
+				.insert(gun::ProjectileVelocity(200.0))
+				.insert(gun::GunShotsPerSecond(40.0))
+				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));
 
 			parent
 				.spawn_bundle(SpriteBundle {
@@ -45,11 +45,11 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 					texture: asset_server.load("temp_turret.png"),
 					..default()
 				})
-				.insert(Turret)
-				.insert(ProjectileVelocity(200.0))
-				.insert(FireTurret(false))
-				.insert(GunShotsPerSecond(40.0))
-				.insert(GunDelayTimer(Timer::from_seconds(0.0, false)));
+				.insert(turret::IsTurret)
+				.insert(turret::FireTurret(false))
+				.insert(gun::ProjectileVelocity(200.0))
+				.insert(gun::GunShotsPerSecond(40.0))
+				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));
 		});
 }
 
@@ -68,9 +68,9 @@ pub fn target_spawn_system(mut commands: Commands, time: Res<Time>, mut timer: R
 				},
 				..default()
 			})
-			.insert(Enemy)
-			.insert(Health(10))
-			.insert(Velocity(Vec2::new(
+			.insert(ship::Enemy)
+			.insert(ship::Health(10))
+			.insert(physics::Velocity(Vec2::new(
 				rand::random::<f32>() * 80.0 - 10.0,
 				rand::random::<f32>() * -80.0 - 20.0,
 			)));

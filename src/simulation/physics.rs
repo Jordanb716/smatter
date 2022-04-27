@@ -1,6 +1,12 @@
 use super::*;
 use bevy::sprite::collide_aabb::collide;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct Velocity(pub Vec2);
+
+#[derive(Component, Deref, DerefMut)]
+pub struct VelocityRotational(pub Quat);
+
 pub fn object_movement_system(mut movement_query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
 	for (velocity, mut transform) in movement_query.iter_mut() {
 		transform.translation += velocity.extend(0.0) * time.delta_seconds();
@@ -9,8 +15,8 @@ pub fn object_movement_system(mut movement_query: Query<(&Velocity, &mut Transfo
 
 pub fn projectile_collision_system(
 	mut commands: Commands,
-	projectile_query: Query<(Entity, &Damage, &Transform)>,
-	mut target_query: Query<(&mut Health, &Transform), With<Enemy>>,
+	projectile_query: Query<(Entity, &interaction::Damage, &Transform)>,
+	mut target_query: Query<(&mut ship::Health, &Transform), With<ship::Enemy>>,
 ) {
 	for (projectile_entity, damage, projectile_transform) in projectile_query.iter() {
 		for (mut health, target_transform) in target_query.iter_mut() {

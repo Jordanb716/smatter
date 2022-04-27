@@ -6,13 +6,13 @@ pub fn turret_targeting_system(
 			&Parent,
 			&GlobalTransform,
 			&mut Transform,
-			&ProjectileVelocity,
-			&mut FireTurret,
+			&gun::ProjectileVelocity,
+			&mut turret::FireTurret,
 		),
-		(With<Turret>, Without<Enemy>),
+		(With<turret::IsTurret>, Without<ship::Enemy>),
 	>,
-	enemy: Query<(&Transform, &Velocity), With<Enemy>>,
-	ship_query: Query<&Velocity>,
+	enemy: Query<(&Transform, &physics::Velocity), With<ship::Enemy>>,
+	ship_query: Query<&physics::Velocity>,
 ) {
 	if enemy.is_empty() {
 		for (_, _, _, _, mut turret_fire_turret) in turret.iter_mut() {
@@ -102,14 +102,14 @@ pub fn turret_firing_system(
 		(
 			&Parent,
 			&GlobalTransform,
-			&ProjectileVelocity,
-			&FireTurret,
-			&mut GunDelayTimer,
-			&GunShotsPerSecond,
+			&gun::ProjectileVelocity,
+			&turret::FireTurret,
+			&mut gun::GunDelayTimer,
+			&gun::GunShotsPerSecond,
 		),
-		With<Turret>,
+		With<turret::IsTurret>,
 	>,
-	ship_query: Query<&Velocity>,
+	ship_query: Query<&physics::Velocity>,
 ) {
 	for (
 		turret_parent,
@@ -138,7 +138,7 @@ pub fn turret_firing_system(
 				let velocity_deviation_mps = turret_projectile_velocity.0 * 0.01;
 				let turret_projectile_velocity = turret_projectile_velocity.0
 					+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
-				let gun_velocity = Velocity(ship_query.get(turret_parent.0).unwrap().0);
+				let gun_velocity = physics::Velocity(ship_query.get(turret_parent.0).unwrap().0);
 
 				commands
 					.spawn_bundle(SpriteBundle {
@@ -153,15 +153,15 @@ pub fn turret_firing_system(
 						},
 						..default()
 					})
-					.insert(Projectile)
-					.insert(Velocity(
+					.insert(gun::IsProjectile)
+					.insert(physics::Velocity(
 						Vec2::from(
 							(-turret_transform.rotation.to_scaled_axis().to_array()[2]
 								+ shot_deviation)
 								.sin_cos(),
 						) * turret_projectile_velocity + gun_velocity.0,
 					))
-					.insert(Damage(1));
+					.insert(interaction::Damage(1));
 				audio.play(asset_server.load("temp_gun_fire.ogg"));
 			}
 		}
