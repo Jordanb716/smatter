@@ -29,8 +29,10 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 					texture: asset_server.load("temp_turret.png"),
 					..default()
 				})
-				.insert(turret::IsTurret)
-				.insert(turret::FireTurret(false))
+				.insert(turret::Turret{
+					iff: interaction::IFF::Friendly,
+					..default()
+				})
 				.insert(gun::ProjectileVelocity(200.0))
 				.insert(gun::GunShotsPerSecond(40.0))
 				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));
@@ -45,8 +47,10 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 					texture: asset_server.load("temp_turret.png"),
 					..default()
 				})
-				.insert(turret::IsTurret)
-				.insert(turret::FireTurret(false))
+				.insert(turret::Turret{
+					iff: interaction::IFF::Friendly,
+					..default()
+				})
 				.insert(gun::ProjectileVelocity(200.0))
 				.insert(gun::GunShotsPerSecond(40.0))
 				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));

@@ -1,5 +1,11 @@
 use super::*;
 
+pub enum IFF {
+	Neutral,
+	Friendly,
+	Enemy,
+}
+
 #[derive(Component, Deref, DerefMut)]
 pub struct Damage(pub i32);
 

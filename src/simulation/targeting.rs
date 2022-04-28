@@ -1,61 +1,86 @@
 use super::*;
 
-pub fn turret_targeting_system(
-	mut turret: Query<
-		(
-			&Parent,
-			&GlobalTransform,
-			&mut Transform,
-			&gun::ProjectileVelocity,
-			&mut turret::FireTurret,
-		),
-		(With<turret::IsTurret>, Without<ship::Enemy>),
-	>,
-	enemy: Query<(&Transform, &physics::Velocity), With<ship::Enemy>>,
-	ship_query: Query<&physics::Velocity>,
+pub fn turret_target_selection(
+	mut turrets: Query<(&mut turret::Turret, &GlobalTransform)>,
+	enemies: Query<(Entity, &Transform, &physics::Velocity), With<ship::Enemy>>,
 ) {
-	if enemy.is_empty() {
-		for (_, _, _, _, mut turret_fire_turret) in turret.iter_mut() {
-			turret_fire_turret.0 = false;
+	if enemies.is_empty() {
+		for (mut turret, _) in turrets.iter_mut() {
+			turret.is_firing = false;
 		}
 		return;
-	}
+	} else {
+		for (mut turret_properties, turret_global_transform) in turrets.iter_mut()
+		{
+			let mut target_candidate_entity = None::<Entity>;
+			let mut target_candidate_range = 0.0;
+			//Find best possible target
+			for (enemy, enemy_transform, enemy_velocity) in enemies.iter() {
+				let target_relative_position =
+					(enemy_transform.translation - turret_global_transform.translation).truncate();
+				let target_range = target_relative_position.length();
+				// Check if target is in range
+				// Let target degrees off current aim
+				// Check if target can be aimed at rotationally
 
+				if target_candidate_entity.is_none() || target_range < target_candidate_range {
+					target_candidate_entity = Some(enemy);
+					target_candidate_range = target_range;
+				}
+			}
+			// Set turret's target to best candidate.
+			turret_properties.target_entity = target_candidate_entity;
+		}
+	}
+}
+
+pub fn turret_targeting_system(
+	mut turrets: Query<(
+		&Parent,
+		&GlobalTransform,
+		&mut Transform,
+		&mut turret::Turret,
+		&gun::ProjectileVelocity,
+	)>,
+	enemies: Query<(Entity, &Transform, &physics::Velocity), (With<ship::Enemy>, Without<turret::Turret>)>,
+	ship_query: Query<&physics::Velocity>,
+) {
 	for (
 		turret_parent,
 		turret_global_transform,
 		mut turret_transform,
+		mut turret_properties,
 		projectile_velocity,
-		mut turret_fire_turret,
-	) in turret.iter_mut()
+	) in turrets.iter_mut()
 	{
-		let mut target = enemy.iter().next().unwrap();
-		let mut relative_position =
-			(target.0.translation - turret_global_transform.translation).truncate();
-
-		//Find closest possible target
-		for enemy in enemy.iter() {
-			relative_position =
-				(target.0.translation - turret_global_transform.translation).truncate();
-			let relative_enemy_position =
-				(enemy.0.translation - turret_global_transform.translation).truncate();
-			if relative_enemy_position.length() < relative_position.length() {
-				target = enemy;
-			}
-		}
-
-		let relative_velocity = (target.1).0 - ship_query.get(turret_parent.0).unwrap().0;
-
-		let target_point = target_prediction_first_order(
-			relative_position,
-			relative_velocity,
-			projectile_velocity.0,
-		);
-		if target_point.is_some() {
-			turret_transform.rotation = target_point.unwrap();
-			turret_fire_turret.0 = true;
+		let turret_target = turret_properties.target_entity;
+		if turret_target.is_none() {
+			continue; //Turret has no target.
 		} else {
-			turret_fire_turret.0 = false;
+			let turret_target = enemies.get(turret_target.unwrap());
+			if turret_target.is_err() {
+				continue; // Something Broke.
+			}
+			// Find turret's current target.
+			let (_, target_transform, target_velocity) = turret_target.unwrap();
+
+			let relative_position =
+				(target_transform.translation - turret_global_transform.translation).truncate();
+
+			let ship_velocity = ship_query.get(turret_parent.0).unwrap();
+			let relative_velocity = target_velocity.0 - ship_velocity.0;
+
+			let target_point = target_prediction_first_order(
+				relative_position,
+				relative_velocity,
+				projectile_velocity.0,
+			);
+			if target_point.is_some() {
+				turret_transform.rotation = target_point.unwrap();
+				turret_properties.is_firing = true;
+			} else {
+				turret_properties.is_firing = false;
+			}
 		}
 	}
 }
@@ -98,31 +123,28 @@ pub fn turret_firing_system(
 	asset_server: Res<AssetServer>,
 	audio: Res<Audio>,
 	mut commands: Commands,
-	mut turret: Query<
-		(
-			&Parent,
-			&GlobalTransform,
-			&gun::ProjectileVelocity,
-			&turret::FireTurret,
-			&mut gun::GunDelayTimer,
-			&gun::GunShotsPerSecond,
-		),
-		With<turret::IsTurret>,
-	>,
+	mut turret: Query<(
+		&Parent,
+		&GlobalTransform,
+		&gun::ProjectileVelocity,
+		&turret::Turret,
+		&mut gun::GunDelayTimer,
+		&gun::GunShotsPerSecond,
+	)>,
 	ship_query: Query<&physics::Velocity>,
 ) {
 	for (
 		turret_parent,
 		turret_transform,
 		turret_projectile_velocity,
-		turret_fire_turret,
+		turret_properties,
 		mut turret_gun_delay_timer,
 		turret_shots_per_second,
 	) in turret.iter_mut()
 	{
 		turret_gun_delay_timer.tick(time.delta());
 
-		if turret_fire_turret.0 == true {
+		if turret_properties.is_firing == true {
 			if turret_gun_delay_timer.0.finished() {
 				// Set timer for RoF delay.
 				turret_gun_delay_timer.0 =
@@ -159,7 +181,8 @@ pub fn turret_firing_system(
 							(-turret_transform.rotation.to_scaled_axis().to_array()[2]
 								+ shot_deviation)
 								.sin_cos(),
-						) * turret_projectile_velocity + gun_velocity.0,
+						) * turret_projectile_velocity
+							+ gun_velocity.0,
 					))
 					.insert(interaction::Damage(1));
 				audio.play(asset_server.load("temp_gun_fire.ogg"));
