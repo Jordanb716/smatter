@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub mod camera;
 pub mod gun;
 pub mod interaction;
 pub mod physics;

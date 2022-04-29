@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
+pub struct IsPlayerShip;
+
+#[derive(Component)]
 pub struct Enemy;
 
 #[derive(Component, Deref, DerefMut)]

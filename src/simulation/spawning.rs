@@ -16,6 +16,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 			..default()
 		})
 		.insert(physics::Velocity(Vec2::new(0.0, 40.0)))
+		.insert(ship::IsPlayerShip)
 		.with_children(|parent| {
 			// Turrets
 			parent
