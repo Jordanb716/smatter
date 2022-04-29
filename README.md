@@ -41,3 +41,10 @@ Explosives:
 - Proximity (Straight upgrade to contact, maybe slightly lower damage?)
 
 # Turret Ideas
+
+# Standards
+
+## Z-Layers
+The ship owns layers 1-10, 5 nominal.
+Projectiles owns layers 11-20, 15 nominal.
+Turrets owns layers 21-30, 25 nominal.

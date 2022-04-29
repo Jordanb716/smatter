@@ -5,7 +5,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 	commands
 		.spawn_bundle(SpriteBundle {
 			transform: Transform {
-				translation: Vec3::new(0.0, -500.0, 1.0),
+				translation: Vec3::new(0.0, -500.0, 5.0),
 				..default()
 			},
 			sprite: Sprite {
@@ -23,7 +23,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 				.spawn_bundle(SpriteBundle {
 					sprite: Sprite { ..default() },
 					transform: Transform {
-						translation: Vec3::new(-60.0, 21.0, 1.0),
+						translation: Vec3::new(-60.0, 21.0, 25.0),
 						scale: Vec3::new(1.0, 1.0, 1.0),
 						..default()
 					},
@@ -41,7 +41,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 			parent
 				.spawn_bundle(SpriteBundle {
 					transform: Transform {
-						translation: Vec3::new(60.0, 21.0, 1.0),
+						translation: Vec3::new(60.0, 21.0, 25.0),
 						scale: Vec3::new(1.0, 1.0, 1.0),
 						..default()
 					},

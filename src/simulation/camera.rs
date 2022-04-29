@@ -19,5 +19,7 @@ pub fn camera_follow_player(
 	player_ship: Query<&Transform, (With<ship::IsPlayerShip>, Without<IsCamera>)>,
 ) {
 	let camera_target = player_ship.single().translation;
-	camera.get_single_mut().unwrap().translation = camera_target;
+	let mut camera = camera.get_single_mut().unwrap();
+	camera.translation.x = camera_target.x;
+	camera.translation.y = camera_target.y;
 }

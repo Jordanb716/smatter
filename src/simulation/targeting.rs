@@ -169,7 +169,7 @@ pub fn turret_firing_system(
 							..default()
 						},
 						transform: Transform {
-							translation: turret_transform.translation + Vec3::new(0.0, 0.0, -1.0),
+							translation: turret_transform.translation + Vec3::new(0.0, 0.0,-10.0),
 							scale: Vec3::new(1.0, 1.0, 1.0),
 							..default()
 						},
