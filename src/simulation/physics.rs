@@ -17,6 +17,19 @@ impl Sub for Velocity {
 }
 
 #[derive(Component, Deref, DerefMut)]
+pub struct Acceleration(pub Vec2);
+
+impl Sub for Acceleration {
+	type Output = Self;
+
+	fn sub(self, rhs: Self) -> Self::Output {
+		Self {
+			0: self.0 - rhs.0,
+		}
+	}
+}
+
+#[derive(Component, Deref, DerefMut)]
 pub struct VelocityRotational(pub Quat);
 
 // ==========

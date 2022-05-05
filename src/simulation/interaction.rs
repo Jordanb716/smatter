@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Component)]
 pub enum IFF {
 	Neutral,
 	Friendly,

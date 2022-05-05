@@ -1,60 +1,70 @@
 use super::*;
 
 pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>) {
-	// Ship
 	commands
-		.spawn_bundle(SpriteBundle {
+		.spawn_bundle(ship::ShipBundle {
+			health: ship::Health(10),
 			transform: Transform {
-				translation: Vec3::new(0.0, -500.0, 5.0),
+				translation: Vec3::new(0.0, -500.0, 0.0),
 				..default()
 			},
-			sprite: Sprite {
-				custom_size: Some(Vec2::new(200.0, 200.0)),
-				..default()
-			},
+			velocity: physics::Velocity(Vec2::new(0.0, 40.0)),
+			iff: interaction::IFF::Friendly,
 			texture: asset_server.load("temp_ship.png"),
 			..default()
 		})
-		.insert(physics::Velocity(Vec2::new(0.0, 40.0)))
 		.insert(ship::IsPlayerShip)
+		// Turrets
 		.with_children(|parent| {
-			// Turrets
 			parent
-				.spawn_bundle(SpriteBundle {
-					sprite: Sprite { ..default() },
-					transform: Transform {
-						translation: Vec3::new(-60.0, 21.0, 25.0),
-						scale: Vec3::new(1.0, 1.0, 1.0),
+				.spawn_bundle(turret::TurretSingle {
+					turret_properties: turret::TurretProperties {
+						field_of_view_degreees: 270.0,
 						..default()
 					},
-					texture: asset_server.load("temp_turret.png"),
-					..default()
+					sprite: SpriteBundle {
+						transform: Transform {
+							translation: Vec3::new(-60.0, 21.0, 25.0),
+							..default()
+						},
+						texture: asset_server.load("temp_turret.png"),
+						..default()
+					},
+					gun_properties: gun::GunProperties {
+						gun_type: gun::GunType::Kinetic,
+						rate_of_fire: 10.0,
+						projectile_velocity_mps: 400.0,
+						..default()
+					},
 				})
-				.insert(turret::Turret{
-					iff: interaction::IFF::Friendly,
-					..default()
-				})
-				.insert(gun::ProjectileVelocity(200.0))
-				.insert(gun::GunShotsPerSecond(40.0))
-				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));
+				.with_children(|parent| {
+					parent.spawn_bundle(gun::GunBundle { sprite: default() });
+				});
 
 			parent
-				.spawn_bundle(SpriteBundle {
-					transform: Transform {
-						translation: Vec3::new(60.0, 21.0, 25.0),
-						scale: Vec3::new(1.0, 1.0, 1.0),
+				.spawn_bundle(turret::TurretSingle {
+					turret_properties: turret::TurretProperties {
+						field_of_view_degreees: 270.0,
 						..default()
 					},
-					texture: asset_server.load("temp_turret.png"),
-					..default()
+					sprite: SpriteBundle {
+						transform: Transform {
+							translation: Vec3::new(60.0, 21.0, 25.0),
+							..default()
+						},
+						texture: asset_server.load("temp_turret.png"),
+						..default()
+					},
+					gun_properties: gun::GunProperties {
+						gun_type: gun::GunType::Kinetic,
+						rate_of_fire: 10.0,
+						projectile_velocity_mps: 400.0,
+						..default()
+					},
 				})
-				.insert(turret::Turret{
-					iff: interaction::IFF::Friendly,
-					..default()
-				})
-				.insert(gun::ProjectileVelocity(200.0))
-				.insert(gun::GunShotsPerSecond(40.0))
-				.insert(gun::GunDelayTimer(Timer::from_seconds(0.0, false)));
+				.with_children(|parent| {
+					parent.spawn_bundle(gun::GunBundle { sprite: default() });
+				});
 		});
 }
 
