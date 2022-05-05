@@ -6,5 +6,22 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.7.0"
 rand = "0.8.5"
+
+[dependencies.bevy]
+version = "0.7.0"
+default-features = false
+
+features = [
+	#"animation",			# Animation support and glTF animation loading.
+	"bevy_audio",			# Audio support. Support for all audio formats depends on this.
+	"bevy_gilrs",			# Adds gamepad support.
+	#"bevy_gltf",			# glTF support.
+	"bevy_winit",			# GUI support.
+	"render",				# The render pipeline and all render related plugins.
+	"png",					# PNG picture format support.
+	#"hdr",					# HDR support.
+	"vorbis",				# Ogg Vorbis audio format support.
+	#"x11",					# Make GUI applications use X11 protocol. You could enable wayland feature to override this.
+	#"filesystem_watcher",	# Enable watching the file system for asset hot reload
+]
