@@ -12,6 +12,14 @@ Visual spectacle.
 
 Side Game? Ammo factory? Pay for ammo?
 
+Combo hit idea?
+- Hit enemy with L anti shield
+- Until: Shields are down
+- Then: ...
+
+- Hit enemy with anti shield
+- Then: Hit with torpedo
+
 # Enemy Ideas
 Suicide drone. Basically a missile of various sizes.
 Drone carrier. Makes and releases other drones.
