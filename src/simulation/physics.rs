@@ -3,7 +3,7 @@ use std::ops::Sub;
 use super::*;
 use bevy::sprite::collide_aabb::collide;
 
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Debug)]
 pub struct Velocity(pub Vec2);
 
 impl Sub for Velocity {
@@ -16,7 +16,7 @@ impl Sub for Velocity {
 	}
 }
 
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Debug)]
 pub struct Acceleration(pub Vec2);
 
 impl Sub for Acceleration {

@@ -1,13 +1,13 @@
 use super::*;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub enum IFF {
 	Neutral,
 	Friendly,
 	Enemy,
 }
 
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Debug)]
 pub struct Damage(pub i32);
 
 pub fn kill_system(
