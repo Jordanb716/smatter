@@ -10,9 +10,7 @@ impl Sub for Velocity {
 	type Output = Self;
 
 	fn sub(self, rhs: Self) -> Self::Output {
-		Self {
-			0: self.0 - rhs.0,
-		}
+		Self { 0: self.0 - rhs.0 }
 	}
 }
 
@@ -23,14 +21,29 @@ impl Sub for Acceleration {
 	type Output = Self;
 
 	fn sub(self, rhs: Self) -> Self::Output {
-		Self {
-			0: self.0 - rhs.0,
-		}
+		Self { 0: self.0 - rhs.0 }
 	}
 }
 
 #[derive(Component, Deref, DerefMut)]
 pub struct VelocityRotational(pub Quat);
+
+#[derive(Component)]
+pub struct VelocityCalculated {
+	pub velocity: Velocity,
+	pub last_position: Vec3,
+	pub time: Time,
+}
+
+impl Default for VelocityCalculated {
+	fn default() -> Self {
+		Self {
+			velocity: Velocity(Vec2::ZERO),
+			last_position: Vec3::ZERO,
+			time: Time::default(),
+		}
+	}
+}
 
 // ==========
 // SYSTEMS
@@ -64,5 +77,19 @@ pub fn projectile_collision_system(
 				commands.entity(projectile_entity).despawn();
 			}
 		}
+	}
+}
+
+/// Calculates an objects velocity based on its position delta compared to last frame.
+pub fn velocity_calculation_system(
+	mut object_query: Query<(&GlobalTransform, &mut VelocityCalculated)>,
+) {
+	for (&transform, mut velocity_calculated) in object_query.iter_mut() {
+		velocity_calculated.time.update();
+		let time_delta = velocity_calculated.time.delta_seconds();
+		let position_delta = velocity_calculated.last_position - transform.translation;
+
+		velocity_calculated.velocity = Velocity(position_delta.truncate() / time_delta);
+		velocity_calculated.last_position = transform.translation;
 	}
 }

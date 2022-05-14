@@ -8,6 +8,20 @@ pub enum TurretNumBarrels {
 	Triple,
 }
 
+/// Returns a turrets properties, texture, and texture_size from a list of turret names
+pub fn turret_list(
+	asset_server: &Res<AssetServer>,
+	gun_name: gun_list::GunName,
+) -> (gun::GunProperties, Handle<Image>, Option<Vec2>) {
+	match gun_name {
+		gun_list::GunName::GunMachinegun => (
+			gun::GunProperties::gun_machinegun(asset_server),
+			asset_server.load("temp_turret.png"),
+			Some(Vec2::new(10.0, 10.0)),
+		),
+	}
+}
+
 // ==========
 // Systems
 
@@ -24,6 +38,7 @@ pub fn ship_turret_spawn_system(
 		Changed<ship::ShipTurretAssignmentList>,
 	>,
 ) {
+	// Iterate through ships with Turret Assignment Lists
 	for (ship, mut turret_assignment_list, mut turret_mount_list, children) in
 		turret_assignment_lists.iter_mut()
 	{

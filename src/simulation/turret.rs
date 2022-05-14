@@ -45,7 +45,7 @@ pub struct TurretBundle {
 	pub gun_properties: gun::GunProperties,
 
 	/// List of child gun components
-	pub gun_list: gun_list::TurretGunAssignmentList,
+	pub gun_assignment_list: gun_list::TurretGunAssignmentList,
 
 	pub sprite: Sprite,
 	pub texture: Handle<Image>,
@@ -58,7 +58,7 @@ impl Default for TurretBundle {
 			turret_size: ItemSize::Small,
 			turret_properties: TurretProperties::default(),
 			gun_properties: gun::GunProperties::default(),
-			gun_list: default(),
+			gun_assignment_list: gun_list::TurretGunAssignmentList(None),
 			turret_mount_number: TurretMountNumber(0),
 			transform: default(),
 			global_transform: default(),

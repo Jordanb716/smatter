@@ -15,6 +15,7 @@ fn main() {
 
 		// Physics
 		.add_system(simulation::physics::object_movement_system)
+		.add_system(simulation::physics::velocity_calculation_system)
 
 		//Interaction
 		.add_system(simulation::physics::projectile_collision_system)
@@ -22,6 +23,7 @@ fn main() {
 
 		//Spawn turrets and guns
 		.add_system(simulation::turret_list::ship_turret_spawn_system)
+		.add_system(simulation::gun_list::turret_gun_spawn_system)
 
 		//Turrets and guns
 		.add_system(simulation::targeting::turret_target_selection)

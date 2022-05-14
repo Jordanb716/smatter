@@ -14,7 +14,7 @@ pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>)
 			&asset_server,
 			1,
 			gun_list::GunName::GunMachinegun,
-			turret_list::TurretNumBarrels::Single,
+			turret_list::TurretNumBarrels::Double,
 		);
 
 	commands

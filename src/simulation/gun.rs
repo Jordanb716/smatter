@@ -13,16 +13,27 @@ pub struct IsGun;
 #[derive(Component)]
 pub struct IsProjectile;
 
+//#[derive(Component, Deref, DerefMut)]
+//pub struct GunPosition(pub Vec2);
+
 #[derive(Component, Deref, DerefMut)]
-pub struct GunPosition(pub Vec2);
+pub struct GunCycleTimer(Timer);
 
 #[derive(Component, Clone, Debug)]
 pub struct GunProperties {
 	pub gun_size: ItemSize,
 	pub gun_type: GunType,
 	pub rate_of_fire: f32,
+
 	pub projectile_velocity_mps: f32,
-	pub gun_cycle_timer: Option<Timer>,
+	pub velocity_deviation_percent: f32,
+	pub bullet_spread_degrees: f32,
+
+	pub projectile_texture: Handle<Image>,
+	/// Defines the size the texture should be rendered at in meters.
+	pub projectile_texture_size: Vec2,
+	pub fire_sound: Handle<AudioSource>,
+	pub projectile_damage: i32,
 }
 
 impl Default for GunProperties {
@@ -31,8 +42,46 @@ impl Default for GunProperties {
 			gun_size: ItemSize::Small,
 			gun_type: GunType::Kinetic,
 			rate_of_fire: 10.0,
+
 			projectile_velocity_mps: 100.0,
-			gun_cycle_timer: None,
+			velocity_deviation_percent: 0.01,
+			bullet_spread_degrees: 4.0,
+
+			projectile_texture: default(),
+			projectile_texture_size: Vec2::new(1.0, 1.0),
+			fire_sound: default(),
+			projectile_damage: 1,
+		}
+	}
+}
+
+#[derive(Bundle)]
+pub struct GunBundle {
+	//is_gun: IsGun,
+	pub velocity: physics::VelocityCalculated,
+	pub transform: Transform,
+	pub global_transform: GlobalTransform,
+
+	pub gun_cycle_timer: GunCycleTimer,
+
+	pub texture: Handle<Image>,
+	pub sprite: Sprite,
+	pub visibility: Visibility,
+}
+
+impl Default for GunBundle {
+	fn default() -> Self {
+		Self {
+			//is_gun: default(),
+			velocity: default(),
+			transform: default(),
+			global_transform: default(),
+
+			gun_cycle_timer: GunCycleTimer(Timer::default()),
+
+			texture: default(),
+			sprite: default(),
+			visibility: default(),
 		}
 	}
 }
@@ -42,77 +91,67 @@ impl Default for GunProperties {
 
 pub fn gun_firing_system(
 	time: Res<Time>,
-	asset_server: Res<AssetServer>,
 	audio: Res<Audio>,
 	mut commands: Commands,
-	mut turret: Query<(
+	mut guns: Query<(
 		&Parent,
 		&GlobalTransform,
-		&turret::TurretProperties,
-		&mut gun::GunProperties,
+		&physics::VelocityCalculated,
+		&mut GunCycleTimer,
 	)>,
-	ship_query: Query<&physics::Velocity>,
+	turrets: Query<(&turret::TurretProperties, &GunProperties)>,
 ) {
-	for (turret_parent, turret_transform, turret_properties, mut gun_properties) in
-		turret.iter_mut()
-	{
-		if gun_properties.gun_cycle_timer.is_none() {
-			gun_properties.gun_cycle_timer = Some(Timer::from_seconds(
-				1.0 / gun_properties.rate_of_fire,
-				false,
-			));
-		}
+	for (parent_turret, gun_transform, gun_velocity, mut gun_cycle_timer) in guns.iter_mut() {
+		// Get Turret and Gun properties from parent turret
+		let (turret_properties, gun_properties) = turrets
+			.get(parent_turret.0)
+			.expect("Failed to get parent turret.");
 
-		gun_properties
-			.gun_cycle_timer
-			.as_mut()
-			.unwrap()
-			.tick(time.delta());
+		gun_cycle_timer.tick(time.delta());
 
 		if turret_properties.turret_state == turret::TurretState::Firing {
-			if gun_properties.gun_cycle_timer.as_ref().unwrap().finished() {
+			if gun_cycle_timer.finished() {
 				// Set timer for RoF delay.
-				gun_properties.gun_cycle_timer = Some(Timer::from_seconds(
-					1.0 / gun_properties.rate_of_fire,
-					false,
-				));
+				gun_cycle_timer.0 = Timer::from_seconds(1.0 / gun_properties.rate_of_fire, false);
 
 				// Calculate random spread
-				let bullet_spread_degrees = 4.0;
 				let shot_deviation = (((rand::random::<f32>() + rand::random::<f32>()) / 2.0
-					- 0.5) * bullet_spread_degrees)
+					- 0.5) * gun_properties.bullet_spread_degrees)
 					.to_radians();
 
 				// Add deviation to projectile velocity
-				let velocity_deviation_mps = gun_properties.projectile_velocity_mps * 0.01;
+				let velocity_deviation_mps = gun_properties.projectile_velocity_mps
+					* gun_properties.velocity_deviation_percent;
 				let turret_projectile_velocity = gun_properties.projectile_velocity_mps
 					+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
-				let gun_velocity = physics::Velocity(ship_query.get(turret_parent.0).unwrap().0);
 
 				commands
 					.spawn_bundle(SpriteBundle {
 						sprite: Sprite {
-							color: (Color::RED),
+							custom_size: Some(gun_properties.projectile_texture_size),
 							..default()
 						},
 						transform: Transform {
-							translation: turret_transform.translation + Vec3::new(0.0, 0.0, -10.0),
-							scale: Vec3::new(10.0, 10.0, 1.0),
+							translation: gun_transform.translation + Vec3::new(0.0, 0.0, -10.0),
+							rotation: gun_transform.rotation,
 							..default()
 						},
+						texture: gun_properties.projectile_texture.clone(),
 						..default()
 					})
 					.insert(gun::IsProjectile)
 					.insert(physics::Velocity(
 						Vec2::from(
-							(-turret_transform.rotation.to_scaled_axis().to_array()[2]
+							(-gun_transform.rotation.to_scaled_axis().to_array()[2]
 								+ shot_deviation)
 								.sin_cos(),
 						) * turret_projectile_velocity
-							+ gun_velocity.0,
+							+ gun_velocity.velocity.0,
 					))
-					.insert(interaction::Damage(1));
-				audio.play(asset_server.load("temp_gun_fire.ogg"));
+					.insert(interaction::Damage(gun_properties.projectile_damage));
+
+				// Play gunfire sound effect
+				audio.play(gun_properties.fire_sound.clone());
 			}
 		}
 	}

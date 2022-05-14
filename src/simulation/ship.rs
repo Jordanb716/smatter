@@ -83,23 +83,27 @@ impl ShipBundle {
 		turret_num_barrels: turret_list::TurretNumBarrels,
 	) -> Self {
 		let mount_size = self.turret_mount_list[mount_number].mount_size;
+		let (gun_properties, texture, texture_size) =
+			turret_list::turret_list(asset_server, gun_name);
 
 		// Build turret
 		let turret_bundle = turret::TurretBundle {
 			turret_size: mount_size,
 			turret_mount_number: turret::TurretMountNumber(mount_number),
 			turret_properties: self.generate_turret_properties(mount_number),
-			gun_properties: match gun_name {
-				gun_list::GunName::GunMachinegun => gun::GunProperties::gun_machinegun(),
-			},
-			gun_list: gun_list::generate_gun_list(
+			gun_properties: gun_properties,
+			gun_assignment_list: gun_list::generate_gun_list(
 				asset_server,
 				gun_name,
 				mount_size,
 				turret_num_barrels,
 			),
 			transform: self.turret_mount_list[mount_number].mount_transform,
-			texture: asset_server.load("temp_turret.png"),
+			texture: texture,
+			sprite: Sprite {
+				custom_size: texture_size,
+				..default()
+			},
 			..default()
 		};
 

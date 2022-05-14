@@ -9,7 +9,7 @@ pub fn setup_camera(mut commands: Commands) {
 	// Camera
 	let mut camera = OrthographicCameraBundle::new_2d();
 	camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;
-	camera.orthographic_projection.scale = 2000.0;
+	camera.orthographic_projection.scale = 1000.0;
 
 	commands.spawn_bundle(camera).insert(IsCamera);
 }
