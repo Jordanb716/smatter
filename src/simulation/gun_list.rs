@@ -163,7 +163,10 @@ pub fn turret_gun_spawn_system(
 								parent.spawn_bundle(gun::GunBundle {
 									transform: gun_assignment.transform,
 									texture: gun_assignment.texture,
-									//TODO sprite: todo!(),
+									sprite: Sprite {
+										custom_size: Some(gun_assignment.texture_size),
+										..default()
+									},
 									..default()
 								});
 							});

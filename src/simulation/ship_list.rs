@@ -10,9 +10,9 @@ impl ship::ShipBundle {
 			health: ship::Health(100),
 			iff: interaction::IFF::Friendly,
 			transform: spawn_transform,
-			texture: asset_server.load("temp_ship.png"),
+			texture: asset_server.load("ship.png"),
 			sprite: Sprite {
-				custom_size: Some(Vec2::new(100.0, 100.0)),
+				custom_size: Some(Vec2::new(200.0, 200.0)),
 				..default()
 			},
 			..default()
@@ -22,14 +22,14 @@ impl ship::ShipBundle {
 		let mut turret_mounts = ship::ShipTurretMountList(Vec::new());
 		turret_mounts.push(ship::ShipTurretMount {
 			mount_size: ItemSize::Small,
-			mount_transform: Transform::from_xyz(-60.0, 21.0, 25.0)
+			mount_transform: Transform::from_xyz(-31.4, 12.0, 25.0)
 				.with_rotation(Quat::from_rotation_z(-45.0_f32.to_radians())),
 			mount_field_of_view_degrees: 270.0,
 			mount_turret_entity: None,
 		});
 		turret_mounts.push(ship::ShipTurretMount {
 			mount_size: ItemSize::Small,
-			mount_transform: Transform::from_xyz(60.0, 21.0, 25.0)
+			mount_transform: Transform::from_xyz(35.0, 12.0, 25.0)
 				.with_rotation(Quat::from_rotation_z(45.0_f32.to_radians())),
 			mount_field_of_view_degrees: 270.0,
 			mount_turret_entity: None,

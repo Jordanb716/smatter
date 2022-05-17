@@ -17,7 +17,7 @@ pub fn turret_list(
 		gun_list::GunName::GunMachinegun => (
 			gun::GunProperties::gun_machinegun(asset_server),
 			asset_server.load("temp_turret.png"),
-			Some(Vec2::new(10.0, 10.0)),
+			Some(Vec2::new(20.0, 20.0)),
 		),
 	}
 }
