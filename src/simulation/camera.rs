@@ -46,6 +46,5 @@ pub fn camera_zoom_system(
 		};
 		camera.scale -= dy * CAMERA_ZOOM_SENSITIVITY;
 		camera.scale = camera.scale.clamp(CAMERA_SCALE_MIN, CAMERA_SCALE_MAX);
-		dbg!(camera.scale);
 	}
 }
