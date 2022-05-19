@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Copy, PartialEq, Serialize, Deserialize, Debug)]
 pub enum IFF {
 	Neutral,
 	Friendly,

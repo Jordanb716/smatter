@@ -5,6 +5,9 @@ mod simulation;
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
+		// Load Ship and Gun definitions
+		.add_startup_system(simulation::ship_list::generate_ship_definition_template)
+		.insert_resource(simulation::ship_list::read_ship_definitions())
 		// Spawning
 		.add_startup_system(simulation::camera::setup_camera)
 		.add_startup_system(simulation::spawning::spawn_player_ship)

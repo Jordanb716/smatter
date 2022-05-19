@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 pub mod camera;
 pub mod gun;
@@ -14,7 +15,7 @@ pub mod turret_list;
 
 // Components
 
-#[derive(Component, Clone, Copy, Debug, PartialEq)]
+#[derive(Component, Clone, Copy, PartialEq, Serialize, Deserialize, Debug)]
 pub enum ItemSize {
 	Small,
 	Medium,

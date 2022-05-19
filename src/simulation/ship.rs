@@ -6,7 +6,7 @@ pub struct IsPlayerShip;
 #[derive(Component)]
 pub struct Enemy;
 
-#[derive(Component, Deref, DerefMut, Debug)]
+#[derive(Component, Clone, Copy, Deref, DerefMut, Serialize, Deserialize, Debug)]
 pub struct Health(pub i32);
 
 #[derive(Debug)]

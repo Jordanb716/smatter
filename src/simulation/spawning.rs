@@ -1,21 +1,36 @@
 use super::*;
 
-pub fn spawn_player_ship(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_player_ship(
+	mut commands: Commands,
+	asset_server: Res<AssetServer>,
+	ship_definition_list: Res<ship_list::ShipDefinitionList>,
+) {
 	let spawn_transform = Transform::from_xyz(0.0, -500.0, 0.0);
 
-	let player_ship = ship::ShipBundle::ship_temp(spawn_transform, &asset_server)
-		.generate_turret(
-			&asset_server,
-			0,
-			gun_list::GunName::GunMachinegun,
-			turret_list::TurretNumBarrels::Single,
-		)
-		.generate_turret(
-			&asset_server,
-			1,
-			gun_list::GunName::GunMachinegun,
-			turret_list::TurretNumBarrels::Double,
-		);
+	let player_ship = ship_list::spawn_ship(
+		"temp_ship",
+		spawn_transform,
+		&asset_server,
+		&ship_definition_list,
+	)
+	.generate_turret(
+		&asset_server,
+		0,
+		gun_list::GunName::GunMachinegun,
+		turret_list::TurretNumBarrels::Single,
+	)
+	.generate_turret(
+		&asset_server,
+		1,
+		gun_list::GunName::GunMachinegun,
+		turret_list::TurretNumBarrels::Double,
+	)
+	.generate_turret(
+		&asset_server,
+		2,
+		gun_list::GunName::GunMachinegun,
+		turret_list::TurretNumBarrels::Triple,
+	);
 
 	commands
 		.spawn_bundle(player_ship)

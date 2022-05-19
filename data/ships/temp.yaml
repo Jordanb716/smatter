@@ -1,0 +1,27 @@
+---
+ship_name: temp_ship
+health: 100
+iff: Friendly
+texture_path: ship.png
+texture_scale:
+  - 200.0
+  - 200.0
+turrets:
+  - size: Small
+    translation:
+      - -31.4
+      - 12.0
+    rotation_degrees: -45.0
+    field_of_view_degrees: 270.0
+  - size: Small
+    translation:
+      - 35.0
+      - 12.0
+    rotation_degrees: 45.0
+    field_of_view_degrees: 270.0
+  - size: Small
+    translation:
+      - 63.5
+      - -44.0
+    rotation_degrees: 45.0
+    field_of_view_degrees: 270.0
