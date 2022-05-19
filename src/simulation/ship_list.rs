@@ -1,7 +1,6 @@
 use super::*;
 
-// Ship definitions
-
+/// Turret Mount Definition for storing turret mount data in Ship Definitions
 #[derive(Serialize, Deserialize, Debug)]
 struct TurretMountDefinition {
 	size: ItemSize,
@@ -10,6 +9,7 @@ struct TurretMountDefinition {
 	field_of_view_degrees: f32,
 }
 
+/// Ship definition for storing ship hull info as YAMLs
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShipDefinition {
 	ship_name: String,
@@ -17,12 +17,15 @@ pub struct ShipDefinition {
 	iff: interaction::IFF,
 	texture_path: String,
 	texture_scale: Vec2,
-	turrets: Vec<TurretMountDefinition>,
+	turret_mounts: Vec<TurretMountDefinition>,
 }
 
+/// List of Ship Definitions
 #[derive(Deref, DerefMut, Debug)]
 pub struct ShipDefinitionList(Vec<ShipDefinition>);
 
+/// Generates an explanatory template for how a Ship Definition should be formatted in YAML,
+/// then writes it out to a template.yaml file.
 pub fn write_ship_definition_template() {
 	const PATH: &str = "data/ships/";
 	// Define template
@@ -32,7 +35,7 @@ pub fn write_ship_definition_template() {
 		iff: interaction::IFF::Friendly,
 		texture_path: "template_texture.png".to_string(),
 		texture_scale: Vec2::new(200.0, 200.0),
-		turrets: vec![
+		turret_mounts: vec![
 			TurretMountDefinition {
 				size: ItemSize::Small,
 				translation: Vec2::new(-12.3, 45.6),
@@ -57,6 +60,7 @@ pub fn write_ship_definition_template() {
 	crate::game_io::write_definition_template(PATH, ship_definition_template);
 }
 
+/// Reads all *.yaml Ship definition files in data/ships/ and returns them as a ```ShipDefinitionList```
 pub fn read_ship_definitions() -> ShipDefinitionList {
 	const PATH: &str = "data/ships/";
 	let ship_definition_list = ShipDefinitionList(crate::game_io::read_definitions(PATH));
@@ -65,7 +69,7 @@ pub fn read_ship_definitions() -> ShipDefinitionList {
 
 pub fn spawn_ship(
 	ship_name: &str,
-	spawn_transform: Transform,
+	spawn_transform: Transform, // Translation and Rotation to spawn the ship at
 	asset_server: &Res<AssetServer>,
 	ship_definition_list: &Res<ShipDefinitionList>,
 ) -> ship::ShipBundle {
@@ -89,7 +93,7 @@ pub fn spawn_ship(
 
 			// Turret Mounts
 			let mut turret_mounts = ship::ShipTurretMountList(Vec::new());
-			for turret_mount in ship_definition.turrets.iter() {
+			for turret_mount in ship_definition.turret_mounts.iter() {
 				turret_mounts.push(ship::ShipTurretMount {
 					mount_size: turret_mount.size,
 					mount_transform: Transform::from_translation(
@@ -117,41 +121,3 @@ pub fn spawn_ship(
 
 	return ship_bundle;
 }
-
-/*
-pub fn ship_temp(spawn_transform: Transform, asset_server: &Res<AssetServer>) -> Self {
-	let mut ship_bundle = ship::ShipBundle {
-		health: ship::Health(100),
-		iff: interaction::IFF::Friendly,
-		transform: spawn_transform,
-		texture: asset_server.load("ship.png"),
-		sprite: Sprite {
-			custom_size: Some(Vec2::new(200.0, 200.0)),
-			..default()
-		},
-		..default()
-	};
-
-	// Turret Mounts
-	let mut turret_mounts = ship::ShipTurretMountList(Vec::new());
-	turret_mounts.push(ship::ShipTurretMount {
-		mount_size: ItemSize::Small,
-		mount_transform: Transform::from_xyz(-31.4, 12.0, 25.0)
-			.with_rotation(Quat::from_rotation_z(-45.0_f32.to_radians())),
-		mount_field_of_view_degrees: 270.0,
-		mount_turret_entity: None,
-	});
-	turret_mounts.push(ship::ShipTurretMount {
-		mount_size: ItemSize::Small,
-		mount_transform: Transform::from_xyz(35.0, 12.0, 25.0)
-			.with_rotation(Quat::from_rotation_z(45.0_f32.to_radians())),
-		mount_field_of_view_degrees: 270.0,
-		mount_turret_entity: None,
-	});
-
-	// Set Turret Mount List
-	ship_bundle.turret_mount_list = turret_mounts;
-
-	return ship_bundle;
-}
-*/

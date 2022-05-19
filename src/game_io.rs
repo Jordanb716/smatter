@@ -4,7 +4,13 @@ use std::fs;
 pub fn read_definitions<T: for<'de> serde::Deserialize<'de>>(path: &str) -> Vec<T> {
 	let mut definition_list = Vec::<T>::new();
 	// Read directory for definition files
-	for definition_result in fs::read_dir(path).expect("Reading definition directory failed!") {
+	for definition_result in match fs::read_dir(path) {
+		Ok(val) => val,
+		Err(error) => panic!(
+			"Reading definition directory {} failed! Error: {}",
+			path, error
+		),
+	} {
 		// Get path of individual definition file
 		let definition_path = match definition_result {
 			Ok(val) => {
