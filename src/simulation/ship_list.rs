@@ -58,23 +58,8 @@ pub fn generate_ship_definition_template() {
 }
 
 pub fn read_ship_definitions() -> ShipDefinitionList {
-	let mut ship_definition_list = ShipDefinitionList(Vec::new());
-	// Read directory for ship definition files
-	for ship_def_result in
-		fs::read_dir("data/ships/").expect("Reading ship definition directory failed!")
-	{
-		// Get path of individual ship definition file
-		let definition_path = ship_def_result
-			.expect("Reading ship definition path failed")
-			.path();
-		// Read ship definition file
-		let ship_definition = fs::read(definition_path).expect("Reading ship definition failed!");
-		// Convert read ship definition to struct, and push to output vector
-		ship_definition_list.push(
-			serde_yaml::from_slice(&ship_definition)
-				.expect("Converting ship definition from string to struct failed!"),
-		);
-	}
+	const PATH: &str = "data/ships/";
+	let ship_definition_list = ShipDefinitionList(crate::game_io::read_definitions(PATH));
 	return ship_definition_list;
 }
 

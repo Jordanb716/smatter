@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 mod simulation;
+mod game_io;
 
 fn main() {
 	App::new()
