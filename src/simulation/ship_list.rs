@@ -1,5 +1,4 @@
 use super::*;
-use std::fs;
 
 // Ship definitions
 
@@ -24,37 +23,38 @@ pub struct ShipDefinition {
 #[derive(Deref, DerefMut, Debug)]
 pub struct ShipDefinitionList(Vec<ShipDefinition>);
 
-pub fn generate_ship_definition_template() {
+pub fn write_ship_definition_template() {
+	const PATH: &str = "data/ships/";
+	// Define template
 	let ship_definition_template = ShipDefinition {
-		ship_name: "ship_name".to_string(),
+		ship_name: "template_ship".to_string(),
 		health: ship::Health(100),
 		iff: interaction::IFF::Friendly,
-		texture_path: "texture.png".to_string(),
+		texture_path: "template_texture.png".to_string(),
 		texture_scale: Vec2::new(200.0, 200.0),
 		turrets: vec![
 			TurretMountDefinition {
 				size: ItemSize::Small,
-				translation: Vec2::new(-31.4, 12.0),
+				translation: Vec2::new(-12.3, 45.6),
 				rotation_degrees: -45.0,
 				field_of_view_degrees: 270.0,
 			},
 			TurretMountDefinition {
 				size: ItemSize::Medium,
-				translation: Vec2::new(35.0, 12.0),
+				translation: Vec2::new(78.9, 10.0),
 				rotation_degrees: 45.0,
-				field_of_view_degrees: 270.0,
+				field_of_view_degrees: 180.0,
+			},
+			TurretMountDefinition {
+				size: ItemSize::Large,
+				translation: Vec2::new(1.0, 0.1),
+				rotation_degrees: 0.0,
+				field_of_view_degrees: 90.0,
 			},
 		],
 	};
-
-	// Convert template struct to a yaml string
-	let ship_definition_template = serde_yaml::to_string(&ship_definition_template)
-		.expect("Ship Template serialization failed.");
-	// Try to create the directory in case it hasn't been initialized
-	fs::create_dir_all("data/ships/").expect("Ship definition path creation failed.");
-	// Write the template out
-	fs::write("data/ships/ship_template.yaml", ship_definition_template)
-		.expect("Writing Ship Template failed.");
+	// Write out template
+	crate::game_io::write_definition_template(PATH, ship_definition_template);
 }
 
 pub fn read_ship_definitions() -> ShipDefinitionList {

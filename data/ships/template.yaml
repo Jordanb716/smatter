@@ -1,0 +1,27 @@
+---
+ship_name: template_ship
+health: 100
+iff: Friendly
+texture_path: template_texture.png
+texture_scale:
+  - 200.0
+  - 200.0
+turrets:
+  - size: Small
+    translation:
+      - -12.3
+      - 45.6
+    rotation_degrees: -45.0
+    field_of_view_degrees: 270.0
+  - size: Medium
+    translation:
+      - 78.9
+      - 10.0
+    rotation_degrees: 45.0
+    field_of_view_degrees: 180.0
+  - size: Large
+    translation:
+      - 1.0
+      - 0.1
+    rotation_degrees: 0.0
+    field_of_view_degrees: 90.0
