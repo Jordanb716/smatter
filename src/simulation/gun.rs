@@ -1,10 +1,9 @@
 use super::*;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 pub enum GunType {
 	Kinetic,
-	//Laser,
-	//Plasma,
+	//Beam,
 }
 
 #[derive(Component)]
@@ -13,17 +12,15 @@ pub struct IsGun;
 #[derive(Component)]
 pub struct IsProjectile;
 
-//#[derive(Component, Deref, DerefMut)]
-//pub struct GunPosition(pub Vec2);
-
 #[derive(Component, Deref, DerefMut)]
 pub struct GunCycleTimer(Timer);
 
 #[derive(Component, Clone, Debug)]
 pub struct GunProperties {
-	pub gun_size: ItemSize,
 	pub gun_type: GunType,
+	pub gun_size: ItemSize,
 	pub rate_of_fire: f32,
+	pub projectile_damage: f32,
 
 	pub projectile_velocity_mps: f32,
 	pub velocity_deviation_percent: f32,
@@ -33,7 +30,6 @@ pub struct GunProperties {
 	/// Defines the size the texture should be rendered at in meters.
 	pub projectile_texture_size: Vec2,
 	pub fire_sound: Handle<AudioSource>,
-	pub projectile_damage: i32,
 }
 
 impl Default for GunProperties {
@@ -50,7 +46,7 @@ impl Default for GunProperties {
 			projectile_texture: default(),
 			projectile_texture_size: Vec2::new(1.0, 1.0),
 			fire_sound: default(),
-			projectile_damage: 1,
+			projectile_damage: 1.0,
 		}
 	}
 }

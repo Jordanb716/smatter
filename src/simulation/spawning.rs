@@ -4,6 +4,7 @@ pub fn spawn_player_ship(
 	mut commands: Commands,
 	asset_server: Res<AssetServer>,
 	ship_definition_list: Res<ship_list::ShipDefinitionList>,
+	gun_definition_list: Res<gun_list::GunDefinitionList>,
 ) {
 	let spawn_transform = Transform::from_xyz(0.0, -500.0, 0.0);
 
@@ -16,20 +17,23 @@ pub fn spawn_player_ship(
 	.generate_turret(
 		&asset_server,
 		0,
-		gun_list::GunName::GunMachinegun,
+		"machinegun",
 		turret_list::TurretNumBarrels::Single,
+		&gun_definition_list,
 	)
 	.generate_turret(
 		&asset_server,
 		1,
-		gun_list::GunName::GunMachinegun,
+		"machinegun",
 		turret_list::TurretNumBarrels::Double,
+		&gun_definition_list,
 	)
 	.generate_turret(
 		&asset_server,
 		2,
-		gun_list::GunName::GunMachinegun,
+		"machinegun",
 		turret_list::TurretNumBarrels::Triple,
+		&gun_definition_list,
 	);
 
 	commands
@@ -53,7 +57,7 @@ pub fn target_spawn_system(mut commands: Commands, time: Res<Time>, mut timer: R
 				..default()
 			})
 			.insert(ship::Enemy)
-			.insert(ship::Health(10))
+			.insert(ship::Health(10.0))
 			.insert(physics::Velocity(Vec2::new(
 				rand::random::<f32>() * 80.0 - 10.0,
 				rand::random::<f32>() * -80.0 - 20.0,

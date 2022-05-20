@@ -8,18 +8,52 @@ pub enum TurretNumBarrels {
 	Triple,
 }
 
-/// Returns a turrets properties, texture, and texture_size from a list of turret names
-pub fn turret_list(
+/// Returns a turrets texture, and texture_size based on gun_name, size, and num_barrels
+pub fn lookup_turret_texture(
 	asset_server: &Res<AssetServer>,
-	gun_name: gun_list::GunName,
-) -> (gun::GunProperties, Handle<Image>, Option<Vec2>) {
-	match gun_name {
-		gun_list::GunName::GunMachinegun => (
-			gun::GunProperties::gun_machinegun(asset_server),
-			asset_server.load("temp_turret.png"),
-			Some(Vec2::new(20.0, 20.0)),
-		),
-	}
+	gun_name: &str,
+	turret_mount_size: ItemSize,
+	number_barrels: TurretNumBarrels,
+) -> (Handle<Image>, Vec2) {
+	let (turret_texture, turret_texture_size) = match gun_name {
+		//Exceptions for specific guns
+		_ => match turret_mount_size {
+			ItemSize::Small => match number_barrels {
+				TurretNumBarrels::Single => {
+					(asset_server.load("temp_turret.png"), Vec2::new(20.0, 20.0))
+				}
+				TurretNumBarrels::Double => {
+					(asset_server.load("temp_turret.png"), Vec2::new(20.0, 20.0))
+				}
+				TurretNumBarrels::Triple => {
+					(asset_server.load("temp_turret.png"), Vec2::new(20.0, 20.0))
+				}
+			},
+			ItemSize::Medium => match number_barrels {
+				TurretNumBarrels::Single => {
+					(asset_server.load("temp_turret.png"), Vec2::new(40.0, 40.0))
+				}
+				TurretNumBarrels::Double => {
+					(asset_server.load("temp_turret.png"), Vec2::new(40.0, 40.0))
+				}
+				TurretNumBarrels::Triple => {
+					(asset_server.load("temp_turret.png"), Vec2::new(40.0, 40.0))
+				}
+			},
+			ItemSize::Large => match number_barrels {
+				TurretNumBarrels::Single => {
+					(asset_server.load("temp_turret.png"), Vec2::new(80.0, 80.0))
+				}
+				TurretNumBarrels::Double => {
+					(asset_server.load("temp_turret.png"), Vec2::new(80.0, 80.0))
+				}
+				TurretNumBarrels::Triple => {
+					(asset_server.load("temp_turret.png"), Vec2::new(80.0, 80.0))
+				}
+			},
+		},
+	};
+	return (turret_texture, turret_texture_size);
 }
 
 // ==========

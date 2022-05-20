@@ -9,7 +9,7 @@ struct TurretMountDefinition {
 	field_of_view_degrees: f32,
 }
 
-/// Ship definition for storing ship hull info as YAMLs
+/// Ship definition for storing ship hull parameters as YAML
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShipDefinition {
 	ship_name: String,
@@ -31,7 +31,7 @@ pub fn write_ship_definition_template() {
 	// Define template
 	let ship_definition_template = ShipDefinition {
 		ship_name: "template_ship".to_string(),
-		health: ship::Health(100),
+		health: ship::Health(100.0),
 		iff: interaction::IFF::Friendly,
 		texture_path: "template_texture.png".to_string(),
 		texture_scale: Vec2::new(200.0, 200.0),

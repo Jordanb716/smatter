@@ -1,0 +1,18 @@
+---
+gun_name: template_gun
+gun_type: Kinetic
+gun_size: Small
+projectile_damage: 10.0
+rate_of_fire: 10.0
+projectile_velocity_mps: 400.0
+velocity_deviation_percent: 0.01
+bullet_spread_degrees: 4.0
+texture_path: template_texture.png
+texture_render_size:
+  - 10.0
+  - 10.0
+projectile_texture: template_proj_texture.png
+projectile_texture_render_size:
+  - 1.0
+  - 1.0
+fire_sound_path: template_audio.ogg

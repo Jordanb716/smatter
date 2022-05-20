@@ -7,7 +7,7 @@ pub struct IsPlayerShip;
 pub struct Enemy;
 
 #[derive(Component, Clone, Copy, Deref, DerefMut, Serialize, Deserialize, Debug)]
-pub struct Health(pub i32);
+pub struct Health(pub f32);
 
 #[derive(Debug)]
 pub struct ShipTurretMount {
@@ -57,7 +57,7 @@ pub struct ShipBundle {
 impl Default for ShipBundle {
 	fn default() -> Self {
 		Self {
-			health: Health(1),
+			health: Health(1.0),
 			iff: interaction::IFF::Neutral,
 			turret_mount_list: ShipTurretMountList(Vec::new()),
 			turret_assignment_list: ShipTurretAssignmentList(None),
@@ -79,31 +79,51 @@ impl ShipBundle {
 		mut self,
 		asset_server: &Res<AssetServer>,
 		mount_number: usize,
-		gun_name: gun_list::GunName,
+		gun_name: &str,
 		turret_num_barrels: turret_list::TurretNumBarrels,
+		gun_definition_list: &Res<gun_list::GunDefinitionList>,
 	) -> Self {
 		let mount_size = self.turret_mount_list[mount_number].mount_size;
-		let (gun_properties, texture, texture_size) =
-			turret_list::turret_list(asset_server, gun_name);
+		let gun_definition = gun_definition_list
+			.iter()
+			.find(|&x| x.gun_name == gun_name)
+			.expect("fuck");
+		let (turret_texture, turret_texture_size) = turret_list::lookup_turret_texture(
+			asset_server,
+			gun_name,
+			mount_size,
+			turret_num_barrels,
+		);
 
 		// Build turret
 		let turret_bundle = turret::TurretBundle {
 			turret_size: mount_size,
 			turret_mount_number: turret::TurretMountNumber(mount_number),
 			turret_properties: self.generate_turret_properties(mount_number),
-			gun_properties: gun_properties,
+			transform: self.turret_mount_list[mount_number].mount_transform,
+			gun_properties: gun::GunProperties {
+				gun_type: gun_definition.gun_type,
+				gun_size: gun_definition.gun_size,
+				rate_of_fire: gun_definition.rate_of_fire,
+				projectile_damage: gun_definition.projectile_damage,
+				projectile_velocity_mps: gun_definition.projectile_velocity_mps,
+				velocity_deviation_percent: gun_definition.velocity_deviation_percent,
+				bullet_spread_degrees: gun_definition.bullet_spread_degrees,
+				projectile_texture: asset_server.load(&gun_definition.projectile_texture),
+				projectile_texture_size: gun_definition.projectile_texture_render_size,
+				fire_sound: asset_server.load(&gun_definition.fire_sound_path),
+			},
 			gun_assignment_list: gun_list::generate_gun_list(
 				asset_server,
-				gun_name,
 				mount_size,
 				turret_num_barrels,
+				&gun_definition.texture_path,
 			),
-			transform: self.turret_mount_list[mount_number].mount_transform,
-			texture: texture,
 			sprite: Sprite {
-				custom_size: texture_size,
+				custom_size: Some(turret_texture_size),
 				..default()
 			},
+			texture: turret_texture,
 			..default()
 		};
 

@@ -7,7 +7,9 @@ fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
 		// Load Ship and Gun definitions
+		.add_startup_system(simulation::gun_list::write_gun_definition_template)
 		.add_startup_system(simulation::ship_list::write_ship_definition_template)
+		.insert_resource(simulation::gun_list::read_gun_definitions())
 		.insert_resource(simulation::ship_list::read_ship_definitions())
 		// Spawning
 		.add_startup_system(simulation::camera::setup_camera)

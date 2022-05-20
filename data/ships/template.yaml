@@ -1,6 +1,6 @@
 ---
 ship_name: template_ship
-health: 100
+health: 100.0
 iff: Friendly
 texture_path: template_texture.png
 texture_scale:
