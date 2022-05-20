@@ -3,17 +3,16 @@ gun_name: machinegun
 gun_type: Kinetic
 gun_size: Small
 projectile_damage: 1.0
-rate_of_fire: 10.0
-#recoil_time_deviation_percent: 0.01
-projectile_velocity_mps: 400.0
+rate_of_fire: 12.0
+projectile_velocity_mps: 800.0
 velocity_deviation_percent: 0.01
 bullet_spread_degrees: 4.0
 texture_path: temp_turret.png
 texture_render_size:
   - 10.0
   - 10.0
-projectile_texture: temp_turret.png
+projectile_texture: projectile_basic.png
 projectile_texture_render_size:
-  - 10.0
+  - 2.0
   - 10.0
 fire_sound_path: temp_gun_fire.ogg

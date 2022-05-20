@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-mod simulation;
 mod game_io;
+mod simulation;
 
 fn main() {
 	App::new()
@@ -24,7 +24,7 @@ fn main() {
 		.add_system(simulation::physics::projectile_collision_system)
 		.add_system(simulation::interaction::kill_system)
 		//Spawn turrets and guns
-		.add_system(simulation::turret_list::ship_turret_spawn_system)
+		.add_system(simulation::turret::ship_turret_spawn_system)
 		.add_system(simulation::gun_list::turret_gun_spawn_system)
 		//Turrets and guns
 		.add_system(simulation::targeting::turret_target_selection)

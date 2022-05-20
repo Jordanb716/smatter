@@ -15,8 +15,7 @@ pub fn turret_target_selection(
 		}
 		return;
 	} else {
-		for (mut turret_properties, turret_global_transform) in turrets.iter_mut()
-		{
+		for (mut turret_properties, turret_global_transform) in turrets.iter_mut() {
 			let mut target_candidate_entity = None::<Entity>;
 			let mut target_candidate_range = 0.0;
 			//Find best possible target
@@ -47,7 +46,10 @@ pub fn turret_targeting_system(
 		&mut turret::TurretProperties,
 		&gun::GunProperties,
 	)>,
-	enemies: Query<(Entity, &Transform, &physics::Velocity), (With<ship::Enemy>, Without<turret::TurretProperties>)>,
+	enemies: Query<
+		(Entity, &Transform, &physics::Velocity),
+		(With<ship::Enemy>, Without<turret::TurretProperties>),
+	>,
 	ship_query: Query<&physics::Velocity>,
 ) {
 	for (

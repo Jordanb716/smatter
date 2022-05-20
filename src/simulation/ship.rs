@@ -1,5 +1,8 @@
 use super::*;
 
+const BASE_TEXTURE_PATH_PROJECTILES: &str = "textures/projectiles/";
+const BASE_AUDIO_PATH_GUNS: &str = "audio/sounds/guns/";
+
 #[derive(Component)]
 pub struct IsPlayerShip;
 
@@ -80,20 +83,23 @@ impl ShipBundle {
 		asset_server: &Res<AssetServer>,
 		mount_number: usize,
 		gun_name: &str,
-		turret_num_barrels: turret_list::TurretNumBarrels,
+		turret_num_barrels: turret::TurretNumBarrels,
 		gun_definition_list: &Res<gun_list::GunDefinitionList>,
 	) -> Self {
 		let mount_size = self.turret_mount_list[mount_number].mount_size;
-		let gun_definition = gun_definition_list
+		let gun_definition = match gun_definition_list
 			.iter()
-			.find(|&x| x.gun_name == gun_name)
-			.expect("fuck");
-		let (turret_texture, turret_texture_size) = turret_list::lookup_turret_texture(
-			asset_server,
-			gun_name,
-			mount_size,
-			turret_num_barrels,
-		);
+			.find(|&gun_definition| gun_definition.gun_name == gun_name)
+		{
+			Some(val) => val,
+			None => panic!(
+				"Failed to find gun named {} in gun definitions list!",
+				gun_name
+			),
+		};
+
+		let (turret_texture, turret_texture_size) =
+			turret::lookup_turret_texture(asset_server, gun_name, mount_size, turret_num_barrels);
 
 		// Build turret
 		let turret_bundle = turret::TurretBundle {
@@ -109,11 +115,15 @@ impl ShipBundle {
 				projectile_velocity_mps: gun_definition.projectile_velocity_mps,
 				velocity_deviation_percent: gun_definition.velocity_deviation_percent,
 				bullet_spread_degrees: gun_definition.bullet_spread_degrees,
-				projectile_texture: asset_server.load(&gun_definition.projectile_texture),
-				projectile_texture_size: gun_definition.projectile_texture_render_size,
-				fire_sound: asset_server.load(&gun_definition.fire_sound_path),
+				projectile_texture: asset_server.load(
+					&(BASE_TEXTURE_PATH_PROJECTILES.to_string()
+						+ &gun_definition.projectile_texture),
+				),
+				projectile_texture_render_size: gun_definition.projectile_texture_render_size,
+				fire_sound: asset_server
+					.load(&(BASE_AUDIO_PATH_GUNS.to_string() + &gun_definition.fire_sound_path)),
 			},
-			gun_assignment_list: gun_list::generate_gun_list(
+			gun_assignment_list: turret::generate_turret_gun_list(
 				asset_server,
 				mount_size,
 				turret_num_barrels,
@@ -141,8 +151,6 @@ impl ShipBundle {
 			ItemSize::Small => {
 				const ROTATION_VELOCITY: f32 = 10.0;
 				turret::TurretProperties {
-					field_of_view_degrees: self.turret_mount_list[mount_number]
-						.mount_field_of_view_degrees,
 					rotation_velocity: Quat::from_rotation_z(ROTATION_VELOCITY.to_radians()),
 					..default()
 				}
@@ -150,8 +158,6 @@ impl ShipBundle {
 			ItemSize::Medium => {
 				const ROTATION_VELOCITY: f32 = 5.0;
 				turret::TurretProperties {
-					field_of_view_degrees: self.turret_mount_list[mount_number]
-						.mount_field_of_view_degrees,
 					rotation_velocity: Quat::from_rotation_z(ROTATION_VELOCITY.to_radians()),
 					..default()
 				}
@@ -159,8 +165,6 @@ impl ShipBundle {
 			ItemSize::Large => {
 				const ROTATION_VELOCITY: f32 = 2.5;
 				turret::TurretProperties {
-					field_of_view_degrees: self.turret_mount_list[mount_number]
-						.mount_field_of_view_degrees,
 					rotation_velocity: Quat::from_rotation_z(ROTATION_VELOCITY.to_radians()),
 					..default()
 				}

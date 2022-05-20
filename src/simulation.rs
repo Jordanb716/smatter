@@ -6,12 +6,12 @@ pub mod gun;
 pub mod gun_list;
 pub mod interaction;
 pub mod physics;
+pub mod projectile;
 pub mod ship;
 pub mod ship_list;
 pub mod spawning;
 pub mod targeting;
 pub mod turret;
-pub mod turret_list;
 
 // Components
 

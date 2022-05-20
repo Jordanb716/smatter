@@ -6,15 +6,15 @@ pub enum GunType {
 	//Beam,
 }
 
-#[derive(Component)]
+/// Marks entity as a gun
+#[derive(Component, Clone, Default, Debug)]
 pub struct IsGun;
 
-#[derive(Component)]
-pub struct IsProjectile;
-
+/// Timer that tracks time for a gun to cycle and be ready to fire again
 #[derive(Component, Deref, DerefMut)]
 pub struct GunCycleTimer(Timer);
 
+/// Weapon properties of a gun and data needed for its operation and projectile spawning
 #[derive(Component, Clone, Debug)]
 pub struct GunProperties {
 	pub gun_type: GunType,
@@ -28,7 +28,7 @@ pub struct GunProperties {
 
 	pub projectile_texture: Handle<Image>,
 	/// Defines the size the texture should be rendered at in meters.
-	pub projectile_texture_size: Vec2,
+	pub projectile_texture_render_size: Vec2,
 	pub fire_sound: Handle<AudioSource>,
 }
 
@@ -44,16 +44,17 @@ impl Default for GunProperties {
 			bullet_spread_degrees: 4.0,
 
 			projectile_texture: default(),
-			projectile_texture_size: Vec2::new(1.0, 1.0),
+			projectile_texture_render_size: Vec2::new(1.0, 1.0),
 			fire_sound: default(),
 			projectile_damage: 1.0,
 		}
 	}
 }
 
+/// Bundle of components needed to spawn a gun
 #[derive(Bundle)]
 pub struct GunBundle {
-	//is_gun: IsGun,
+	pub is_gun: IsGun,
 	pub velocity: physics::VelocityCalculated,
 	pub transform: Transform,
 	pub global_transform: GlobalTransform,
@@ -68,7 +69,7 @@ pub struct GunBundle {
 impl Default for GunBundle {
 	fn default() -> Self {
 		Self {
-			//is_gun: default(),
+			is_gun: default(),
 			velocity: default(),
 			transform: default(),
 			global_transform: default(),
@@ -108,7 +109,7 @@ pub fn gun_firing_system(
 		if turret_properties.turret_state == turret::TurretState::Firing {
 			if gun_cycle_timer.finished() {
 				// Set timer for RoF delay.
-				gun_cycle_timer.0 = Timer::from_seconds(1.0 / gun_properties.rate_of_fire, false);
+				gun_cycle_timer.0 = Timer::from_seconds(gun_properties.rate_of_fire.recip(), false);
 
 				// Calculate random spread
 				let shot_deviation = (((rand::random::<f32>() + rand::random::<f32>()) / 2.0
@@ -124,7 +125,7 @@ pub fn gun_firing_system(
 				commands
 					.spawn_bundle(SpriteBundle {
 						sprite: Sprite {
-							custom_size: Some(gun_properties.projectile_texture_size),
+							custom_size: Some(gun_properties.projectile_texture_render_size),
 							..default()
 						},
 						transform: Transform {
@@ -135,7 +136,7 @@ pub fn gun_firing_system(
 						texture: gun_properties.projectile_texture.clone(),
 						..default()
 					})
-					.insert(gun::IsProjectile)
+					.insert(projectile::IsProjectile)
 					.insert(physics::Velocity(
 						Vec2::from(
 							(-gun_transform.rotation.to_scaled_axis().to_array()[2]
