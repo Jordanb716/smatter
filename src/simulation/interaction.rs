@@ -7,7 +7,13 @@ pub enum IFF {
 	Enemy,
 }
 
-#[derive(Component, Deref, DerefMut, Debug)]
+impl Default for IFF{
+    fn default() -> Self {
+        IFF::Neutral
+    }
+}
+
+#[derive(Component, Deref, DerefMut, Default, Debug)]
 pub struct Damage(pub f32);
 
 pub fn kill_system(

@@ -120,31 +120,29 @@ pub fn gun_firing_system(
 				let turret_projectile_velocity = gun_properties.projectile_velocity_mps
 					+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
 
-				commands
-					.spawn_bundle(SpriteBundle {
-						sprite: Sprite {
-							custom_size: Some(gun_properties.projectile_texture_render_size),
-							..default()
-						},
-						transform: Transform {
-							translation: gun_transform.translation + Vec3::new(0.0, 0.0, -10.0),
-							rotation: gun_transform.rotation,
-							..default()
-						},
-						texture: gun_properties.projectile_texture.clone(),
+				commands.spawn_bundle(projectile::ProjectileBundle {
+					damage: interaction::Damage(gun_properties.projectile_damage),
+					iff: ship_iff.clone(),
+					transform: Transform {
+						translation: gun_transform.translation + Vec3::new(0.0, 0.0, -10.0),
+						rotation: gun_transform.rotation,
 						..default()
-					})
-					.insert(projectile::IsProjectile)
-					.insert(physics::Velocity(
+					},
+					velocity: physics::Velocity(
 						Vec2::from(
 							(-gun_transform.rotation.to_scaled_axis().to_array()[2]
 								+ shot_deviation)
 								.sin_cos(),
 						) * turret_projectile_velocity
 							+ ship_velocity.0,
-					))
-					.insert(interaction::Damage(gun_properties.projectile_damage))
-					.insert(ship_iff.clone());
+					),
+					sprite: Sprite {
+						custom_size: Some(gun_properties.projectile_texture_render_size),
+						..default()
+					},
+					texture: gun_properties.projectile_texture.clone(),
+					..default()
+				});
 
 				// Play gunfire sound effect
 				audio.play(gun_properties.fire_sound.clone());

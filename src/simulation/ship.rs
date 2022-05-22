@@ -50,7 +50,6 @@ pub struct ShipBundle {
 
 	pub sprite: Sprite,
 	pub texture: Handle<Image>,
-	/// User indication of whether an entity is visible
 	pub visibility: Visibility,
 }
 
