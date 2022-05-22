@@ -19,7 +19,6 @@ fn main() {
 		.add_system(simulation::camera::camera_zoom_system)
 		// Physics
 		.add_system(simulation::physics::object_movement_system)
-		.add_system(simulation::physics::velocity_calculation_system)
 		//Interaction
 		.add_system(simulation::physics::projectile_collision_system)
 		.add_system(simulation::interaction::kill_system)

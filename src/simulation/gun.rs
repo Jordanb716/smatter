@@ -55,7 +55,6 @@ impl Default for GunProperties {
 #[derive(Bundle)]
 pub struct GunBundle {
 	pub is_gun: IsGun,
-	pub velocity: physics::VelocityCalculated,
 	pub transform: Transform,
 	pub global_transform: GlobalTransform,
 
@@ -70,7 +69,6 @@ impl Default for GunBundle {
 	fn default() -> Self {
 		Self {
 			is_gun: default(),
-			velocity: default(),
 			transform: default(),
 			global_transform: default(),
 
@@ -90,21 +88,21 @@ pub fn gun_firing_system(
 	time: Res<Time>,
 	audio: Res<Audio>,
 	mut commands: Commands,
-	mut guns: Query<(
-		&Parent,
-		&GlobalTransform,
-		&physics::VelocityCalculated,
-		&mut GunCycleTimer,
-	)>,
-	turrets: Query<(&turret::TurretProperties, &GunProperties)>,
+	mut guns: Query<(&Parent, &GlobalTransform, &mut GunCycleTimer)>,
+	turrets: Query<(&Parent, &turret::TurretProperties, &GunProperties)>,
+	ships: Query<(&interaction::IFF, &physics::Velocity)>,
 ) {
-	for (parent_turret, gun_transform, gun_velocity, mut gun_cycle_timer) in guns.iter_mut() {
+	for (parent_turret, gun_transform, mut gun_cycle_timer) in guns.iter_mut() {
 		// Get Turret and Gun properties from parent turret
-		let (turret_properties, gun_properties) = turrets
+		let (turret_parent, turret_properties, gun_properties) = turrets
 			.get(parent_turret.0)
 			.expect("Failed to get parent turret.");
 
 		gun_cycle_timer.tick(time.delta());
+
+		let (ship_iff, ship_velocity) = ships
+			.get(turret_parent.0)
+			.expect("Failed to get turret's parent ship");
 
 		if turret_properties.turret_state == turret::TurretState::Firing {
 			if gun_cycle_timer.finished() {
@@ -143,9 +141,10 @@ pub fn gun_firing_system(
 								+ shot_deviation)
 								.sin_cos(),
 						) * turret_projectile_velocity
-							+ gun_velocity.velocity.0,
+							+ ship_velocity.0,
 					))
-					.insert(interaction::Damage(gun_properties.projectile_damage));
+					.insert(interaction::Damage(gun_properties.projectile_damage))
+					.insert(ship_iff.clone());
 
 				// Play gunfire sound effect
 				audio.play(gun_properties.fire_sound.clone());

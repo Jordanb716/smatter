@@ -117,11 +117,11 @@ pub fn target_spawn_system(mut commands: Commands, time: Res<Time>, mut timer: R
 				},
 				..default()
 			})
-			.insert(ship::Enemy)
 			.insert(ship::Health(10.0))
 			.insert(physics::Velocity(Vec2::new(
 				rand::random::<f32>() * 80.0 - 10.0,
 				rand::random::<f32>() * -80.0 - 20.0,
-			)));
+			)))
+			.insert(interaction::IFF::Enemy);
 	}
 }

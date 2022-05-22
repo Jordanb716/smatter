@@ -1,6 +1,6 @@
 use std::ops::Sub;
 
-use super::*;
+use super::{interaction::IFF, *};
 use bevy::sprite::collide_aabb::collide;
 
 #[derive(Component, Deref, DerefMut, Debug)]
@@ -28,23 +28,6 @@ impl Sub for Acceleration {
 #[derive(Component, Deref, DerefMut)]
 pub struct VelocityRotational(pub Quat);
 
-#[derive(Component)]
-pub struct VelocityCalculated {
-	pub velocity: Velocity,
-	pub last_position: Vec3,
-	pub time: Time,
-}
-
-impl Default for VelocityCalculated {
-	fn default() -> Self {
-		Self {
-			velocity: Velocity(Vec2::ZERO),
-			last_position: Vec3::ZERO,
-			time: Time::default(),
-		}
-	}
-}
-
 // ==========
 // SYSTEMS
 
@@ -60,11 +43,17 @@ pub fn object_movement_system(
 
 pub fn projectile_collision_system(
 	mut commands: Commands,
-	projectile_query: Query<(Entity, &interaction::Damage, &Transform)>,
-	mut target_query: Query<(&mut ship::Health, &Transform), With<ship::Enemy>>,
+	projectile_query: Query<(Entity, &interaction::Damage, &Transform, &IFF)>,
+	mut target_query: Query<(&mut ship::Health, &Transform, &IFF)>,
 ) {
-	for (projectile_entity, damage, projectile_transform) in projectile_query.iter() {
-		for (mut health, target_transform) in target_query.iter_mut() {
+	for (projectile_entity, damage, projectile_transform, projectile_iff) in projectile_query.iter()
+	{
+		for (mut target_health, target_transform, target_iff) in target_query.iter_mut() {
+			// Skip collision checks for friendly targets
+			if projectile_iff == target_iff {
+				continue;
+			}
+
 			let collision = collide(
 				target_transform.translation,
 				Vec2::new(target_transform.scale.x, target_transform.scale.y),
@@ -73,23 +62,9 @@ pub fn projectile_collision_system(
 			);
 
 			if collision.is_some() {
-				health.0 -= damage.0;
+				target_health.0 -= damage.0;
 				commands.entity(projectile_entity).despawn();
 			}
 		}
-	}
-}
-
-/// Calculates an objects velocity based on its position delta compared to last frame.
-pub fn velocity_calculation_system(
-	mut object_query: Query<(&GlobalTransform, &mut VelocityCalculated)>,
-) {
-	for (&transform, mut velocity_calculated) in object_query.iter_mut() {
-		velocity_calculated.time.update();
-		let time_delta = velocity_calculated.time.delta_seconds();
-		let position_delta = velocity_calculated.last_position - transform.translation;
-
-		velocity_calculated.velocity = Velocity(position_delta.truncate() / time_delta);
-		velocity_calculated.last_position = transform.translation;
 	}
 }

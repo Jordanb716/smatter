@@ -6,9 +6,6 @@ const BASE_AUDIO_PATH_GUNS: &str = "audio/sounds/guns/";
 #[derive(Component)]
 pub struct IsPlayerShip;
 
-#[derive(Component)]
-pub struct Enemy;
-
 #[derive(Component, Clone, Copy, Deref, DerefMut, Serialize, Deserialize, Debug)]
 pub struct Health(pub f32);
 

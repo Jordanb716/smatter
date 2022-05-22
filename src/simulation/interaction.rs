@@ -12,7 +12,7 @@ pub struct Damage(pub f32);
 
 pub fn kill_system(
 	mut commands: Commands,
-	enemy: Query<(Entity, &ship::Health), (Changed<ship::Health>, With<ship::Enemy>)>,
+	enemy: Query<(Entity, &ship::Health), Changed<ship::Health>>,
 ) {
 	for (entity, health) in enemy.iter() {
 		if health.0 <= 0.0 {

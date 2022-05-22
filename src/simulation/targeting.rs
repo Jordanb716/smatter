@@ -1,4 +1,4 @@
-use super::*;
+use super::{interaction::IFF, *};
 
 //#[derive(Component)]
 //pub enum MissileTargetingPhase{}
@@ -6,29 +6,47 @@ use super::*;
 // Relock?
 
 pub fn turret_target_selection(
-	mut turrets: Query<(&mut turret::TurretProperties, &GlobalTransform)>,
-	enemies: Query<(Entity, &Transform, &physics::Velocity), With<ship::Enemy>>,
+	mut turrets: Query<(
+		&mut turret::TurretProperties,
+		&GlobalTransform,
+		&Parent,
+	)>,
+	ship_query: Query<&IFF>,
+	target_candidates: Query<(Entity, &Transform, &IFF)>,
 ) {
-	if enemies.is_empty() {
-		for (mut turret, _) in turrets.iter_mut() {
+	if target_candidates.is_empty() {
+		for (mut turret, _, _) in turrets.iter_mut() {
 			turret.turret_state = turret::TurretState::NoTarget;
 		}
 		return;
 	} else {
-		for (mut turret_properties, turret_global_transform) in turrets.iter_mut() {
+		for (
+			mut turret_properties,
+			turret_global_transform,
+			turret_parent,
+		) in turrets.iter_mut()
+		{
 			let mut target_candidate_entity = None::<Entity>;
 			let mut target_candidate_range = 0.0;
 			//Find best possible target
-			for (enemy, enemy_transform, enemy_velocity) in enemies.iter() {
-				let target_relative_position =
-					(enemy_transform.translation - turret_global_transform.translation).truncate();
+			for (candidate_entity, candidate_transform, candidate_iff) in target_candidates.iter() {
+				// Find parent ship
+				let own_iff = ship_query.get(turret_parent.0).expect("msg");
+				// Only proceed if candidate IFF different from own,
+				//  and Turret's bullets are faster than the target
+				if candidate_iff == own_iff {
+					continue;
+				}
+				let target_relative_position = (candidate_transform.translation
+					- turret_global_transform.translation)
+					.truncate();
 				let target_range = target_relative_position.length();
 				// Check if target is in range
 				// Let target degrees off current aim
 				// Check if target can be aimed at rotationally
 
 				if target_candidate_entity.is_none() || target_range < target_candidate_range {
-					target_candidate_entity = Some(enemy);
+					target_candidate_entity = Some(candidate_entity);
 					target_candidate_range = target_range;
 				}
 			}
@@ -46,10 +64,7 @@ pub fn turret_targeting_system(
 		&mut turret::TurretProperties,
 		&gun::GunProperties,
 	)>,
-	enemies: Query<
-		(Entity, &Transform, &physics::Velocity),
-		(With<ship::Enemy>, Without<turret::TurretProperties>),
-	>,
+	enemies: Query<(Entity, &Transform, &physics::Velocity), Without<turret::TurretProperties>>,
 	ship_query: Query<&physics::Velocity>,
 ) {
 	for (
