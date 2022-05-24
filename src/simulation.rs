@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 pub mod camera;
+pub mod cartridge_list;
 pub mod gun;
 pub mod gun_list;
 pub mod interaction;
@@ -20,6 +21,12 @@ pub enum ItemSize {
 	Small,
 	Medium,
 	Large,
+}
+
+impl Default for ItemSize {
+	fn default() -> Self {
+		ItemSize::Small
+	}
 }
 
 // Resources

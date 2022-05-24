@@ -1,6 +1,5 @@
 use super::*;
 
-const BASE_TEXTURE_PATH_PROJECTILES: &str = "textures/projectiles/";
 const BASE_AUDIO_PATH_GUNS: &str = "audio/sounds/guns/";
 
 #[derive(Component)]
@@ -81,6 +80,7 @@ impl ShipBundle {
 		gun_name: gun_list::GunName,
 		turret_num_barrels: turret::TurretNumBarrels,
 		gun_definition_list: &Res<gun_list::GunDefinitionList>,
+		cartridge_definition_list: &Res<cartridge_list::CartridgeDefinitionList>,
 	) -> Self {
 		let mount_size = self.turret_mount_list[mount_number].mount_size;
 		let gun_definition = match gun_definition_list
@@ -107,15 +107,19 @@ impl ShipBundle {
 				gun_type: gun_definition.gun_type,
 				gun_size: gun_definition.gun_size,
 				rate_of_fire: gun_definition.rate_of_fire,
-				projectile_damage: gun_definition.projectile_damage,
-				projectile_velocity_mps: gun_definition.projectile_velocity_mps,
-				velocity_deviation_percent: gun_definition.velocity_deviation_percent,
-				bullet_spread_degrees: gun_definition.bullet_spread_degrees,
-				projectile_texture: asset_server.load(
-					&(BASE_TEXTURE_PATH_PROJECTILES.to_string()
-						+ &gun_definition.projectile_texture),
-				),
-				projectile_texture_render_size: gun_definition.projectile_texture_render_size,
+
+				cartridge_data: match cartridge_definition_list.iter().find(
+					|&cartridge_definition| {
+						cartridge_definition.projectile_name == gun_definition.projectile_name
+					},
+				) {
+					Some(val) => val.clone(),
+					None => panic!(
+						"Failed to find cartridge named {:?} in cartridge definitions list!",
+						gun_definition.projectile_name
+					),
+				},
+
 				fire_sound: asset_server
 					.load(&(BASE_AUDIO_PATH_GUNS.to_string() + &gun_definition.fire_sound_path)),
 			},

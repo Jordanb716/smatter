@@ -12,20 +12,14 @@ pub enum GunName {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GunDefinition {
 	pub gun_name: GunName,
+	pub projectile_name: cartridge_list::ProjectileName,
 	pub gun_type: gun::GunType,
 	pub gun_size: ItemSize,
 
-	pub projectile_damage: f32,
 	pub rate_of_fire: f32,
-
-	pub projectile_velocity_mps: f32,
-	pub velocity_deviation_percent: f32,
-	pub bullet_spread_degrees: f32,
 
 	pub texture_path: String,
 	pub texture_render_size: Vec2,
-	pub projectile_texture: String,
-	pub projectile_texture_render_size: Vec2,
 	pub fire_sound_path: String,
 }
 
@@ -39,18 +33,13 @@ pub fn write_gun_definition_template() {
 	// Define template
 	let ship_definition_template = GunDefinition {
 		gun_name: GunName::TemplateGun,
+		projectile_name: cartridge_list::ProjectileName::TemplateProjectile,
 		gun_type: gun::GunType::Kinetic,
 		gun_size: ItemSize::Small,
-		projectile_damage: 10.0,
 		rate_of_fire: 10.0,
-		projectile_velocity_mps: 400.0,
-		velocity_deviation_percent: 0.01,
-		bullet_spread_degrees: 4.0,
 		texture_path: "template_texture.png".to_string(),
 		texture_render_size: Vec2::new(10.0, 10.0),
-		projectile_texture: "template_proj_texture.png".to_string(),
-		projectile_texture_render_size: Vec2::new(1.0, 1.0),
-		fire_sound_path: "template_audio.ogg".to_string(),
+    fire_sound_path: "template_audio.ogg".to_string(),
 	};
 	// Write out template
 	crate::game_io::write_definition_template(GUN_DATA_PATH, ship_definition_template);

@@ -7,6 +7,7 @@ pub fn spawn_player_ship(
 	asset_server: Res<AssetServer>,
 	ship_definition_list: Res<ship_list::ShipDefinitionList>,
 	gun_definition_list: Res<gun_list::GunDefinitionList>,
+	cartridge_definition_list: Res<cartridge_list::CartridgeDefinitionList>,
 ) {
 	let spawn_transform = Transform::from_xyz(0.0, -500.0, 0.0);
 
@@ -16,27 +17,54 @@ pub fn spawn_player_ship(
 		&asset_server,
 		&ship_definition_list,
 	)
-	.generate_turret(
+	.generate_turret( // Nose
 		&asset_server,
 		0,
 		gun_list::GunName::SmallMachinegun,
-		turret::TurretNumBarrels::Single,
+		turret::TurretNumBarrels::Double,
 		&gun_definition_list,
+		&cartridge_definition_list,
 	)
-	/*.generate_turret(
+	/* .generate_turret( // Front Left
 		&asset_server,
 		1,
 		gun_list::GunName::SmallMachinegun,
-		turret::TurretNumBarrels::Double,
+		turret::TurretNumBarrels::Single,
 		&gun_definition_list,
-	)*/
-	.generate_turret(
+		&cartridge_definition_list,
+	)
+	.generate_turret( // Front Right
 		&asset_server,
 		2,
 		gun_list::GunName::SmallMachinegun,
+		turret::TurretNumBarrels::Single,
+		&gun_definition_list,
+		&cartridge_definition_list,
+	)
+	.generate_turret( // Rear Left
+		&asset_server,
+		3,
+		gun_list::GunName::SmallMachinegun,
+		turret::TurretNumBarrels::Double,
+		&gun_definition_list,
+		&cartridge_definition_list,
+	)
+	.generate_turret( // Rear Right
+		&asset_server,
+		4,
+		gun_list::GunName::SmallMachinegun,
+		turret::TurretNumBarrels::Double,
+		&gun_definition_list,
+		&cartridge_definition_list,
+	)
+	.generate_turret( // Tail
+		&asset_server,
+		5,
+		gun_list::GunName::SmallMachinegun,
 		turret::TurretNumBarrels::Triple,
 		&gun_definition_list,
-	);
+		&cartridge_definition_list,
+	) */;
 
 	commands
 		.spawn_bundle(player_ship)

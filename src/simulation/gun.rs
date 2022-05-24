@@ -1,9 +1,17 @@
 use super::*;
 
+const BASE_TEXTURE_PATH_PROJECTILES: &str = "textures/projectiles/";
+
 #[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 pub enum GunType {
 	Kinetic,
 	//Beam,
+}
+
+impl Default for GunType {
+	fn default() -> Self {
+		GunType::Kinetic
+	}
 }
 
 /// Marks entity as a gun
@@ -15,40 +23,13 @@ pub struct IsGun;
 pub struct GunCycleTimer(Timer);
 
 /// Weapon properties of a gun and data needed for its operation and projectile spawning
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone, Default, Debug)]
 pub struct GunProperties {
 	pub gun_type: GunType,
 	pub gun_size: ItemSize,
 	pub rate_of_fire: f32,
-	pub projectile_damage: f32,
-
-	pub projectile_velocity_mps: f32,
-	pub velocity_deviation_percent: f32,
-	pub bullet_spread_degrees: f32,
-
-	pub projectile_texture: Handle<Image>,
-	/// Defines the size the texture should be rendered at in meters.
-	pub projectile_texture_render_size: Vec2,
+	pub cartridge_data: cartridge_list::CartridgeDefinition,
 	pub fire_sound: Handle<AudioSource>,
-}
-
-impl Default for GunProperties {
-	fn default() -> Self {
-		Self {
-			gun_size: ItemSize::Small,
-			gun_type: GunType::Kinetic,
-			rate_of_fire: 10.0,
-
-			projectile_velocity_mps: 100.0,
-			velocity_deviation_percent: 0.01,
-			bullet_spread_degrees: 4.0,
-
-			projectile_texture: default(),
-			projectile_texture_render_size: Vec2::new(1.0, 1.0),
-			fire_sound: default(),
-			projectile_damage: 1.0,
-		}
-	}
 }
 
 /// Bundle of components needed to spawn a gun
@@ -87,6 +68,7 @@ impl Default for GunBundle {
 pub fn gun_firing_system(
 	time: Res<Time>,
 	audio: Res<Audio>,
+	asset_server: Res<AssetServer>,
 	mut commands: Commands,
 	mut guns: Query<(&Parent, &GlobalTransform, &mut GunCycleTimer)>,
 	turrets: Query<(&Parent, &turret::TurretProperties, &GunProperties)>,
@@ -111,17 +93,18 @@ pub fn gun_firing_system(
 
 				// Calculate random spread
 				let shot_deviation = (((rand::random::<f32>() + rand::random::<f32>()) / 2.0
-					- 0.5) * gun_properties.bullet_spread_degrees)
+					- 0.5) * gun_properties.cartridge_data.bullet_spread_degrees)
 					.to_radians();
 
 				// Add deviation to projectile velocity
-				let velocity_deviation_mps = gun_properties.projectile_velocity_mps
-					* gun_properties.velocity_deviation_percent;
-				let turret_projectile_velocity = gun_properties.projectile_velocity_mps
-					+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
+				let velocity_deviation_mps = gun_properties.cartridge_data.projectile_velocity_mps
+					* gun_properties.cartridge_data.velocity_deviation_percent;
+				let turret_projectile_velocity =
+					gun_properties.cartridge_data.projectile_velocity_mps
+						+ (rand::random::<f32>() - 0.5) * velocity_deviation_mps;
 
 				commands.spawn_bundle(projectile::ProjectileBundle {
-					damage: interaction::Damage(gun_properties.projectile_damage),
+					damage: interaction::Damage(gun_properties.cartridge_data.projectile_damage),
 					iff: ship_iff.clone(),
 					transform: Transform {
 						translation: gun_transform.translation + Vec3::new(0.0, 0.0, -10.0),
@@ -137,10 +120,13 @@ pub fn gun_firing_system(
 							+ ship_velocity.0,
 					),
 					sprite: Sprite {
-						custom_size: Some(gun_properties.projectile_texture_render_size),
+						custom_size: Some(gun_properties.cartridge_data.texture_render_size),
 						..default()
 					},
-					texture: gun_properties.projectile_texture.clone(),
+					texture: asset_server.load(
+						&(BASE_TEXTURE_PATH_PROJECTILES.to_string()
+							+ &gun_properties.cartridge_data.texture_path),
+					),
 					..default()
 				});
 

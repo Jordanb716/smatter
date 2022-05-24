@@ -95,7 +95,7 @@ pub fn turret_targeting_system(
 			let target_point = target_prediction_first_order(
 				relative_position,
 				relative_velocity,
-				gun_properties.projectile_velocity_mps,
+				gun_properties.cartridge_data.projectile_velocity_mps,
 			);
 			if target_point.is_some() {
 				turret_transform.rotation = target_point.unwrap();

@@ -4,9 +4,22 @@ use super::*;
 #[derive(Component, Clone, Default, Debug)]
 pub struct IsProjectile;
 
+#[derive(Component, Clone, Serialize, Deserialize, Debug)]
+pub enum ProjectileGuidance {
+	None,
+	ProportionalNavigation,
+}
+
+impl Default for ProjectileGuidance {
+	fn default() -> Self {
+		ProjectileGuidance::None
+	}
+}
+
 #[derive(Bundle, Default, Debug)]
 pub struct ProjectileBundle {
 	pub is_projectile: projectile::IsProjectile,
+	pub guidance: ProjectileGuidance,
 	pub damage: interaction::Damage,
 	pub iff: interaction::IFF,
 

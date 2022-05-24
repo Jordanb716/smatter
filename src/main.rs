@@ -6,9 +6,12 @@ mod simulation;
 fn main() {
 	App::new()
 		.add_plugins(DefaultPlugins)
-		// Load Ship and Gun definitions
+		// Write out definition templates
+		.add_startup_system(simulation::cartridge_list::write_cartridge_definition_template)
 		.add_startup_system(simulation::gun_list::write_gun_definition_template)
 		.add_startup_system(simulation::ship_list::write_ship_definition_template)
+		// Load definitions
+		.insert_resource(simulation::cartridge_list::read_cartridge_definitions())
 		.insert_resource(simulation::gun_list::read_gun_definitions())
 		.insert_resource(simulation::ship_list::read_ship_definitions())
 		// Spawning
