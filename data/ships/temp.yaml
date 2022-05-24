@@ -7,21 +7,39 @@ texture_scale:
   - 200.0
   - 200.0
 turret_mounts:
-  - size: Small
+  - size: Small # Nose
+    translation:
+      - 1.8
+      - 78.0
+    rotation_degrees: -45.0
+    field_of_view_degrees: 270.0
+  - size: Small # Front left
     translation:
       - -31.4
       - 12.0
     rotation_degrees: -45.0
     field_of_view_degrees: 270.0
-  - size: Small
+  - size: Small # Front Right
     translation:
       - 35.0
       - 12.0
     rotation_degrees: 45.0
     field_of_view_degrees: 270.0
-  - size: Small
+  - size: Small # Rear Left
+    translation:
+      - -59.5
+      - -44.0
+    rotation_degrees: 45.0
+    field_of_view_degrees: 270.0
+  - size: Small # Rear Right
     translation:
       - 63.5
       - -44.0
-    rotation_degrees: 45.0
+    rotation_degrees: -45.0
+    field_of_view_degrees: 270.0
+  - size: Small # Tail
+    translation:
+      - 1.8
+      - -71.2
+    rotation_degrees: -45.0
     field_of_view_degrees: 270.0
