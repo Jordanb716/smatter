@@ -11,7 +11,7 @@ pub fn spawn_player_ship(
 	let spawn_transform = Transform::from_xyz(0.0, -500.0, 0.0);
 
 	let player_ship = spawn_ship(
-		"temp_ship",
+		ship_list::ShipName::PlayerTempShip,
 		spawn_transform,
 		&asset_server,
 		&ship_definition_list,
@@ -19,21 +19,21 @@ pub fn spawn_player_ship(
 	.generate_turret(
 		&asset_server,
 		0,
-		"machinegun",
+		gun_list::GunName::SmallMachinegun,
 		turret::TurretNumBarrels::Single,
 		&gun_definition_list,
 	)
-	.generate_turret(
+	/*.generate_turret(
 		&asset_server,
 		1,
-		"machinegun",
+		gun_list::GunName::SmallMachinegun,
 		turret::TurretNumBarrels::Double,
 		&gun_definition_list,
-	)
+	)*/
 	.generate_turret(
 		&asset_server,
 		2,
-		"machinegun",
+		gun_list::GunName::SmallMachinegun,
 		turret::TurretNumBarrels::Triple,
 		&gun_definition_list,
 	);
@@ -44,7 +44,7 @@ pub fn spawn_player_ship(
 }
 
 pub fn spawn_ship(
-	ship_name: &str,
+	ship_name: ship_list::ShipName,
 	spawn_transform: Transform, // Translation and Rotation to spawn the ship at
 	asset_server: &Res<AssetServer>,
 	ship_definition_list: &Res<ship_list::ShipDefinitionList>,
@@ -92,7 +92,7 @@ pub fn spawn_ship(
 		None =>
 		// Never found the ship in the list.
 		{
-			panic!("Failed to find {} in Ship definitions list!", ship_name)
+			panic!("Failed to find {:?} in Ship definitions list!", ship_name)
 		}
 	};
 

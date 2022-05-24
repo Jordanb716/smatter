@@ -1,5 +1,5 @@
 ---
-ship_name: temp_ship
+ship_name: PlayerTempShip
 health: 100
 iff: Friendly
 texture_path: ship.png

@@ -1,5 +1,5 @@
 ---
-ship_name: template_ship
+ship_name: TemplateShip
 health: 100.0
 iff: Friendly
 texture_path: template_texture.png

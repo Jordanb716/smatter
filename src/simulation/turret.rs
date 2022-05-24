@@ -99,7 +99,7 @@ impl Default for TurretBundle {
 /// Returns a turrets texture, and texture_size based on gun_name, size, and num_barrels
 pub fn lookup_turret_texture(
 	asset_server: &Res<AssetServer>,
-	gun_name: &str,
+	gun_name: gun_list::GunName,
 	turret_mount_size: ItemSize,
 	number_barrels: TurretNumBarrels,
 ) -> (Handle<Image>, Vec2) {

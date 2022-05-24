@@ -2,6 +2,12 @@ use super::*;
 
 const SHIP_DATA_PATH: &str = "data/ships/";
 
+#[derive(PartialEq, Serialize, Deserialize, Debug)]
+pub enum ShipName {
+	TemplateShip,
+	PlayerTempShip,
+}
+
 /// Turret Mount Definition for storing turret mount data in Ship Definitions
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TurretMountDefinition {
@@ -14,7 +20,7 @@ pub struct TurretMountDefinition {
 /// Ship definition for storing ship hull parameters as YAML
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShipDefinition {
-	pub ship_name: String,
+	pub ship_name: ShipName,
 	pub health: ship::Health,
 	pub iff: interaction::IFF,
 	pub texture_path: String,
@@ -31,7 +37,7 @@ pub struct ShipDefinitionList(Vec<ShipDefinition>);
 pub fn write_ship_definition_template() {
 	// Define template
 	let ship_definition_template = ShipDefinition {
-		ship_name: "template_ship".to_string(),
+		ship_name: ShipName::TemplateShip,
 		health: ship::Health(100.0),
 		iff: interaction::IFF::Friendly,
 		texture_path: "template_texture.png".to_string(),

@@ -78,7 +78,7 @@ impl ShipBundle {
 		mut self,
 		asset_server: &Res<AssetServer>,
 		mount_number: usize,
-		gun_name: &str,
+		gun_name: gun_list::GunName,
 		turret_num_barrels: turret::TurretNumBarrels,
 		gun_definition_list: &Res<gun_list::GunDefinitionList>,
 	) -> Self {
@@ -89,7 +89,7 @@ impl ShipBundle {
 		{
 			Some(val) => val,
 			None => panic!(
-				"Failed to find gun named {} in gun definitions list!",
+				"Failed to find gun named {:?} in gun definitions list!",
 				gun_name
 			),
 		};

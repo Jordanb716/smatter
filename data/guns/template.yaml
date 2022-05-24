@@ -1,5 +1,5 @@
 ---
-gun_name: template_gun
+gun_name: TemplateGun
 gun_type: Kinetic
 gun_size: Small
 projectile_damage: 10.0

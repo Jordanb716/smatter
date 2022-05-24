@@ -2,10 +2,16 @@ use super::*;
 
 const GUN_DATA_PATH: &str = "data/guns/";
 
+#[derive(PartialEq, Serialize, Deserialize, Debug)]
+pub enum GunName {
+	TemplateGun,
+	SmallMachinegun,
+}
+
 /// Gun definition for storing gun parameters as YAML
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GunDefinition {
-	pub gun_name: String,
+	pub gun_name: GunName,
 	pub gun_type: gun::GunType,
 	pub gun_size: ItemSize,
 
@@ -32,7 +38,7 @@ pub struct GunDefinitionList(Vec<GunDefinition>);
 pub fn write_gun_definition_template() {
 	// Define template
 	let ship_definition_template = GunDefinition {
-		gun_name: "template_gun".to_string(),
+		gun_name: GunName::TemplateGun,
 		gun_type: gun::GunType::Kinetic,
 		gun_size: ItemSize::Small,
 		projectile_damage: 10.0,
